@@ -69,7 +69,11 @@ We walked the same graph over 40 moments: 32 real closed-market moments from the
 
 ## Receipts
 
-Real sales appear on the page and in [`data/receipts.json`](data/receipts.json), each with its Robinhood Chain transaction.
+**First real sale, Saturday 26 September 2026, on Robinhood Chain mainnet:** Talos sold 0.013635 NVDA for 3.06 USDG through Uniswap: [swap](https://robinhoodchain.blockscout.com/tx/0x3ca96c692d2b80422de0d32a5a3517e18ae3175159d58253492d1be7609e6150), [approval](https://robinhoodchain.blockscout.com/tx/0x873693e16a0d75016fcb53c6f6011b429d3574387c60a15e925390f489390f0f).
+
+To be clear about how it was triggered: NVDA was only down 0.34% that weekend, so for the demo the owner approved a rule with a **0.2% trigger that sells on any size of move**. SERV compiled it (and, as asked, left out the normal-day check), `gpt-6-luna` walked it through SERV and said sell, Talos's code agreed, the dry run passed, and the sale went through under the $10 cap. The same weekend, a sensible rule ("sell half on a 3% drop") held, which is the point.
+
+Every sale is also in [`data/receipts.json`](data/receipts.json).
 
 ## Revenue, for Talos and for SERV
 
