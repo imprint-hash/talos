@@ -415,7 +415,8 @@ const HUBS = {
   back:    { label: "Sold, it came back", sub: "selling hurt", color: "#f25c78", fx: .66, fy: .78 },
   flat:    { label: "Sold, ended flat", sub: "", color: "#f4cf2f", fx: .88, fy: .76 },
 };
-let bmSim = null, bmNodes = null, bmKey = null;
+let bmSim = null, bmNodes = null, bmKey = null, bmPointer = null;
+const bmCalm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 function bubbleMap() {
   const box = $("#bm"), svg = d3.select("#bmsvg"), tip = $("#bmtip");
   const W = box.clientWidth, H = box.clientHeight;
@@ -441,7 +442,21 @@ function bubbleMap() {
     if (bmSim) bmSim.stop();
     bmSim = d3.forceSimulation(bmNodes)
       .force("x", d3.forceX(d => at[d.hub].x).strength(.1)).force("y", d3.forceY(d => at[d.hub].y).strength(.1))
-      .force("collide", d3.forceCollide(d => rad(d) + 2).strength(.9)).force("charge", d3.forceManyBody().strength(-5));
+      .force("collide", d3.forceCollide(d => rad(d) * (d.hot ? 1.45 : 1) + 2).strength(.9)).force("charge", d3.forceManyBody().strength(-5))
+      .force("pointer", alpha => {            // bubbles near the cursor drift away from it
+        if (!bmPointer) return;
+        for (const d of bmNodes) {
+          const dx = d.x - bmPointer[0], dy = d.y - bmPointer[1], dist = Math.hypot(dx, dy) || 1;
+          if (dist < 90 && !d.hot) { const k = (90 - dist) / 90 * 2.2 * alpha; d.vx += dx / dist * k; d.vy += dy / dist * k; }
+        }
+      })
+      .force("float", () => {                  // a little drift so the map never goes still
+        if (bmCalm) return;
+        for (const d of bmNodes) { d.vx += (Math.random() - .5) * .08; d.vy += (Math.random() - .5) * .08; }
+      });
+    if (!bmCalm) bmSim.alphaTarget(.02);
+    svg.on("mousemove.push", e => { const [x, y] = d3.pointer(e); bmPointer = [x, y]; if (!bmCalm) bmSim.alpha(Math.max(bmSim.alpha(), .12)).restart(); })
+       .on("mouseleave.push", () => { bmPointer = null; });
   }
   bmNodes.forEach(d => { d.hub = hubOf(d); });
   const link = svg.select(".links").selectAll("line").data(bmNodes).join("line").attr("stroke-width", 1).attr("stroke-opacity", .4).attr("stroke", d => HUBS[d.hub].color);
@@ -449,9 +464,16 @@ function bubbleMap() {
     .on("mousemove", (e, d) => {
       const r = state.view === "talos" ? d.t : d.u, b = box.getBoundingClientRect();
       tip.innerHTML = `<b>${d.kind === "weekend" ? "Weekend" : "Night"} · ${esc(d.label)}</b><span>Deepest dip ${d.deepest_pct}% · opened ${d.open_pct > 0 ? "+" : ""}${d.open_pct}%</span>` +
-        (r.outcome !== "never" ? `<span>Sold at −${r.fired_drop_pct}%, then ${r.after_pct > 0 ? "+" : ""}${r.after_pct}% by the open (${r.vs_holding_usd >= 0 ? "+" : "−"}$${Math.abs(r.vs_holding_usd).toFixed(2)} per $1,000)</span>` : `<span>Held</span>`);
+        (r.outcome !== "never" ? `<span>Sold at −${r.fired_drop_pct}%, then ${r.after_pct > 0 ? "+" : ""}${r.after_pct}% by the open (${r.vs_holding_usd >= 0 ? "+" : "−"}$${Math.abs(r.vs_holding_usd).toFixed(2)} per $1,000)</span>`
+          : d.hub === "talos" && d.u.outcome !== "never" ? `<span>Held by Talos. Your rule alone would have sold at −${d.u.fired_drop_pct}%, and by the open it was ${d.u.after_pct > 0 ? "+" : ""}${d.u.after_pct}% from there (${d.u.vs_holding_usd >= 0 ? "+" : "−"}$${Math.abs(d.u.vs_holding_usd).toFixed(2)} per $1,000).</span>` : `<span>Held</span>`);
       tip.style.left = Math.min(W - 270, e.clientX - b.left + 14) + "px"; tip.style.top = (e.clientY - b.top + 14) + "px"; tip.style.opacity = 1;
-    }).on("mouseleave", () => tip.style.opacity = 0);
+    })
+    .on("mouseenter", function (e, d) { d.hot = true; d3.select(this).raise().transition().duration(220).attr("r", rad(d) * 1.45); bmSim.force("collide").radius(n => rad(n) * (n.hot ? 1.45 : 1) + 2); bmSim.alpha(.35).restart(); })
+    .on("mouseleave", function (e, d) { d.hot = false; tip.style.opacity = 0; d3.select(this).transition().duration(260).attr("r", rad(d)); bmSim.force("collide").radius(n => rad(n) * (n.hot ? 1.45 : 1) + 2); bmSim.alpha(.25).restart(); })
+    .call(d3.drag()
+      .on("start", (e, d) => { bmSim.alphaTarget(.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on("end", (e, d) => { bmSim.alphaTarget(bmCalm ? 0 : .02); d.fx = null; d.fy = null; }));
   node.transition().duration(500).attr("fill", d => HUBS[d.hub].color);
   const used = new Set(bmNodes.map(d => d.hub));
   const cnt = k => bmNodes.filter(d => d.hub === k).length;
