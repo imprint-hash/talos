@@ -265,7 +265,7 @@
       <div class="card" style="padding:0; overflow:hidden">
         <div class="row" style="margin:0; padding: 20px 24px 0; justify-content: space-between"><b style="font-weight:600">Every night and weekend, as a bubble map</b><span class="note">Hover a bubble for its night</span></div>
         <div class="bm" id="bm"><svg id="bmsvg"></svg><div class="bmtip" id="bmtip"></div></div>
-        <div class="legend" style="padding: 0 24px 20px"><span style="--c:#b3a8ff"><i></i>Held: never reached your trigger</span><span style="--c:#fb8b5a"><i></i>Held by Talos: a normal move for NVDA</span><span style="--c:#2fc48d"><i></i>Sold, it kept falling</span><span style="--c:#f25c78"><i></i>Sold, it came back</span><span style="--c:#f4cf2f"><i></i>Sold, ended flat</span></div>
+        <div class="legend" style="padding: 0 24px 20px"><span style="--c:#8f7bff"><i></i>Held: never reached your trigger (darker came closer)</span><span style="--c:#fb8b5a"><i></i>Held by Talos: a normal move for NVDA</span><span style="--c:#2fc48d"><i></i>Sold, it kept falling</span><span style="--c:#f25c78"><i></i>Sold, it came back</span><span style="--c:#f4cf2f"><i></i>Sold, ended flat</span></div>
       </div>
     </div>
     <div class="card" style="margin-top:24px"><b style="font-weight:600">Every sale, and what happened next</b><table class="tape" id="tape"></table></div>
@@ -535,11 +535,26 @@ function bubbleMap() {
       .on("start", (e, d) => { bmSim.alphaTarget(.3).restart(); d.fx = d.x; d.fy = d.y; })
       .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
       .on("end", (e, d) => { bmSim.alphaTarget(bmCalm ? 0 : .02); d.fx = null; d.fy = null; }));
-  node.transition().duration(500).attr("fill", d => HUBS[d.hub].color);
+  // Held bubbles are shaded by how close they came to the trigger: deep purple nearly fired.
+  const near = d3.scaleLinear().domain([0, 1]).range(["#dcd7ff", "#5a48f0"]).clamp(true);
+  node.transition().duration(500).attr("fill", d => d.hub === "small" ? near(Math.abs(Math.min(0, d.deepest_pct)) / trig) : HUBS[d.hub].color);
+  // When the rule never sells, say so, and name the closest call.
+  const firedN = bmNodes.filter(d => ["falling", "back", "flat"].includes(d.hub)).length;
+  const closest = bmNodes.reduce((a, d) => (d.deepest_pct < a.deepest_pct ? d : a));
+  svg.selectAll("g.nevernote").remove();
+  if (!firedN) {
+    const g = svg.append("g").attr("class", "nevernote").attr("transform", `translate(${W * .56},${H * .44})`);
+    g.append("rect").attr("x", -10).attr("y", -26).attr("rx", 14).attr("width", Math.min(400, W * .42)).attr("height", 108).attr("fill", "#fff").attr("filter", "drop-shadow(0 10px 24px rgba(92,86,196,.18))");
+    const t = g.append("text").attr("font-family", "Poppins").attr("font-size", 13).attr("fill", "#2b2d5c");
+    [["Your rule never sold in " + bmNodes.length + " nights and weekends.", 600],
+     [`Closest call: ${closest.deepest_pct}% on ${closest.kind === "weekend" ? "the weekend of " : ""}${closest.label}.`, 400],
+     [`Your trigger is −${trig}%. NVDA rarely moves that far`, 400], ["while the market is shut. Try a smaller trigger.", 400]]
+      .forEach(([line, w], i) => t.append("tspan").attr("x", 6).attr("dy", i ? 20 : 0).attr("font-weight", w).text(line));
+  }
   const used = new Set(bmNodes.map(d => d.hub));
   const cnt = k => bmNodes.filter(d => d.hub === k).length;
   const hub = svg.select(".hubs").selectAll("g").data(hubs).join(enter => { const g = enter.append("g").attr("class", "hub"); g.append("text").attr("class", "l"); g.append("text").attr("class", "sub"); return g; })
-    .attr("transform", h => `translate(${h.x},${h.y})`).style("opacity", h => used.has(h.k) ? 1 : .3);
+    .attr("transform", h => `translate(${h.x},${h.y})`).style("opacity", h => used.has(h.k) ? 1 : bmNodes.every(d => d.hub === "small") ? 0 : .3);
   hub.select("text.l").attr("text-anchor", "middle").attr("y", h => -Math.min(120, 40 + Math.sqrt(cnt(h.k)) * 17)).text(h => `${h.label} · ${cnt(h.k)}`);
   hub.select("text.sub").attr("text-anchor", "middle").attr("y", h => -Math.min(120, 40 + Math.sqrt(cnt(h.k)) * 17) + 15).text(h => h.sub);
   bmSim.force("x").x(d => at[d.hub].x); bmSim.force("y").y(d => at[d.hub].y);
