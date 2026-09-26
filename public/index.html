@@ -3,328 +3,416 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Talos — keeps watch while the market sleeps</title>
-<meta name="description" content="Tokenized Nvidia still trades when Wall Street is dark. Approve a SERV reasoning flowchart, not a black-box bot.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23c8894b'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%230f0d0b'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Talos — protects your stock tokens while the market sleeps</title>
+<meta name="description" content="Write a rule in plain English. SERV Reasoning turns it into a flowchart you approve. Talos sells NVDA on Robinhood Chain only when your rule and the market both say so.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%236c5cf5'/%3E%3Cpath d='M9 11h14M16 11v12' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
 <style>
   :root {
-    --page: #0f0d0b; --surf: #17140f; --surf2: #1e1a14; --line: #2e2820;
-    --ink: #f3ece2; --ink2: #c9bca9; --muted: #8c8171;
-    --bronze: #c8894b; --bronze2: #e3ad73; --patina: #5fb3a1;
-    --bad: #e0715e; --good: #6cc38e; --warn: #e2b04a;
-    --serif: Fraunces, Georgia, serif; --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", monospace;
+    --bg: #dfe1f7; --card: #ffffff; --soft: #f4f5fd; --line: #eceefa;
+    --ink: #2b2d5c; --ink2: #55588a; --muted: #9597bd;
+    --purple: #6c5cf5; --purple2: #8f7bff; --pink: #f25c78; --yellow: #f4cf2f; --cyan: #56bff7; --orange: #fb8b5a; --green: #2fc48d;
+    --shadow: 0 18px 50px rgba(92, 86, 196, .14), 0 2px 6px rgba(92, 86, 196, .06);
   }
   * { box-sizing: border-box; margin: 0; }
-  body { background: var(--page); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; }
-  a { color: var(--bronze2); }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  body { background: var(--bg); color: var(--ink); font-family: Poppins, system-ui, sans-serif; font-size: 15px; line-height: 1.55; }
+  a { color: var(--purple); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+  .card { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 26px; }
+  .label { color: var(--muted); font-size: 13px; }
+  .up { color: var(--green); } .down { color: var(--pink); }
 
-  header.top { border-bottom: 1px solid var(--line); background: rgba(15,13,11,.92); position: sticky; top: 0; z-index: 5; backdrop-filter: blur(6px); }
-  header.top .wrap { display: flex; align-items: center; gap: 18px; height: 60px; }
-  .mark { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: .01em; }
-  .mark i { font-style: normal; color: var(--bronze); }
-  .strip { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; font-family: var(--mono); font-size: 13px; }
-  .pill { border: 1px solid var(--line); background: var(--surf); border-radius: 999px; padding: 5px 12px; color: var(--ink2); white-space: nowrap; }
-  .pill b { color: var(--ink); font-weight: 500; }
-  .pill.closed { border-color: #3d3322; color: var(--warn); }
-  .pill.open { border-color: #24402f; color: var(--good); }
+  nav.top { position: sticky; top: 0; z-index: 10; background: rgba(223,225,247,.88); backdrop-filter: blur(10px); }
+  nav.top .wrap { display: flex; align-items: center; gap: 22px; height: 70px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
+  .logo span.m { width: 32px; height: 32px; border-radius: 10px; background: var(--purple); display: grid; place-items: center; }
+  .search { flex: 1; max-width: 360px; background: var(--card); border-radius: 12px; padding: 9px 16px; color: var(--muted); font-size: 13px; display: flex; gap: 8px; align-items: center; }
+  .tabs { margin-left: auto; display: flex; gap: 26px; }
+  .tabs a { color: var(--ink2); text-decoration: none; font-size: 14px; padding: 22px 0 20px; border-bottom: 3px solid transparent; }
+  .tabs a:hover { color: var(--ink); border-color: var(--purple); }
 
-  .hero { padding: 64px 0 36px; display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; align-items: center; }
-  .hero h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(38px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -.01em; text-wrap: balance; }
-  .hero h1 em { font-style: normal; color: var(--bronze2); }
-  .hero p { color: var(--ink2); font-size: 19px; margin-top: 18px; max-width: 56ch; }
-  .myth { border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; background: linear-gradient(160deg, #1d1810, #13110d); }
-  .myth .k { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--patina); }
-  .myth p { font-family: var(--serif); font-size: 21px; line-height: 1.4; margin-top: 10px; color: var(--ink); }
-  .myth .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
-  .myth .facts div { border-top: 1px solid var(--line); padding-top: 10px; }
-  .myth .facts b { display: block; font-family: var(--serif); font-size: 26px; color: var(--bronze2); }
-  .myth .facts span { font-size: 13px; color: var(--muted); }
+  .hero { display: grid; grid-template-columns: 330px 330px 1fr; gap: 24px; padding: 34px 0 10px; align-items: start; }
+  .price { font-size: 36px; font-weight: 500; letter-spacing: -.01em; margin-top: 4px; }
+  .price small { font-size: 14px; margin-left: 8px; }
+  .bars { display: flex; align-items: flex-end; gap: 7px; height: 96px; margin: 20px 0 6px; }
+  .bars i { width: 6px; border-radius: 6px; display: block; }
+  .ring { display: flex; gap: 18px; align-items: center; }
+  .ring svg { flex: none; }
+  .ring b { font-size: 21px; font-weight: 600; display: block; line-height: 1.2; }
+  .meter { display: grid; grid-template-columns: auto 1fr; gap: 14px 16px; align-items: center; margin-top: 22px; font-size: 14px; }
+  .meter .k { display: flex; align-items: center; gap: 9px; color: var(--ink2); }
+  .meter .k::before { content: ""; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--c); }
+  .meter .bar { height: 5px; background: var(--line); border-radius: 5px; position: relative; overflow: hidden; }
+  .meter .bar i { position: absolute; inset: 0 auto 0 0; background: var(--c); border-radius: 5px; }
+  .meter .v { grid-column: 2; margin-top: -10px; font-size: 12px; color: var(--muted); }
+  .pitch { padding: 12px 0 0 10px; }
+  .pitch h1 { font-size: clamp(34px, 3.8vw, 50px); line-height: 1.12; font-weight: 600; letter-spacing: -.02em; text-wrap: balance; }
+  .pitch h1 em { font-style: normal; color: var(--purple); }
+  .pitch p { color: var(--ink2); font-size: 16px; margin-top: 16px; max-width: 52ch; }
+  .state { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: var(--card); border-radius: 999px; padding: 7px 14px; font-size: 13px; box-shadow: var(--shadow); }
+  .state i { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(251,139,90,.18); flex: none; }
+  .state.open i { background: var(--green); box-shadow: 0 0 0 4px rgba(47,196,141,.18); }
 
-  section.step { border-top: 1px solid var(--line); padding: 40px 0; }
-  .step-h { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
-  .step-h .n { font-family: var(--mono); color: var(--bronze); font-size: 14px; }
-  .step-h h2 { font-family: var(--serif); font-size: 30px; font-weight: 700; }
-  .step-h p { color: var(--muted); margin-left: auto; font-size: 14px; max-width: 46ch; text-align: right; }
+  section { padding: 40px 0 8px; scroll-margin-top: 80px; }
+  .sh { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+  .sh h2 { font-size: 24px; font-weight: 600; }
+  .sh p { color: var(--ink2); font-size: 14px; }
+  .sh .n { width: 30px; height: 30px; border-radius: 9px; background: var(--card); display: grid; place-items: center; font-weight: 600; font-size: 13px; color: var(--purple); box-shadow: var(--shadow); align-self: center; }
 
-  textarea { width: 100%; min-height: 96px; resize: vertical; background: var(--surf); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; font: inherit; font-size: 18px; }
-  textarea:focus, button:focus-visible { outline: 2px solid var(--bronze); outline-offset: 2px; }
+  textarea { width: 100%; min-height: 86px; resize: vertical; border: 1.5px solid var(--line); border-radius: 14px; padding: 16px 18px; font: inherit; font-size: 17px; color: var(--ink); background: var(--soft); }
+  textarea:focus, button:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .chip { border: 1px dashed #3a3228; background: none; color: var(--ink2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
-  .chip:hover { border-color: var(--bronze); color: var(--ink); }
-  .row { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
-  button.go { background: var(--bronze); color: #1a1208; border: 0; border-radius: 12px; padding: 12px 20px; font: inherit; font-weight: 600; font-size: 16px; cursor: pointer; }
-  button.go:disabled { opacity: .5; cursor: wait; }
-  button.ghost { background: none; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 11px 18px; font: inherit; cursor: pointer; }
-  .note { color: var(--muted); font-size: 14px; }
-  .err { color: var(--bad); }
-
-  .grid2 { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
-  .card { background: var(--surf); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
-  #graph, #graph2 { min-height: 220px; display: grid; place-items: center; overflow-x: auto; }
-  .checkgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 28px; }
-  .checkgrid .check:first-child { border-top: 1px solid var(--line); }
-  #graph svg, #graph2 svg { max-width: 100%; height: auto; }
-  .check { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
-  .check:first-child { border-top: 0; }
-  .who { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border-radius: 6px; padding: 3px 7px; height: fit-content; }
-  .who.you { background: #2a2216; color: var(--bronze2); }
-  .who.talos { background: #172a26; color: var(--patina); }
-  .check b { display: block; }
-  .check span { color: var(--muted); font-size: 14px; }
-  .summary { font-family: var(--serif); font-size: 21px; line-height: 1.35; margin-bottom: 12px; }
-
-  .bubbles { position: relative; height: 330px; }
-  .bub { position: absolute; border-radius: 50%; display: grid; place-items: center; text-align: center; transform: translate(-50%, -50%); transition: all .6s ease; padding: 8px; }
-  .bub b { font-family: var(--serif); font-size: 24px; display: block; line-height: 1; }
-  .bub span { font-size: 12px; line-height: 1.2; display: block; margin-top: 4px; }
-  .bub.never { background: #211c15; border: 1px solid #3b3226; color: var(--ink2); }
-  .bub.bounced { background: rgba(224,113,94,.16); border: 1px solid rgba(224,113,94,.55); color: #f4b7aa; }
-  .bub.kept_falling { background: rgba(108,195,142,.16); border: 1px solid rgba(108,195,142,.55); color: #b3e6c6; }
-  .bub.flat { background: rgba(226,176,74,.12); border: 1px solid rgba(226,176,74,.45); color: #efd49a; }
-  .toggle { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  .toggle button { background: none; border: 0; color: var(--ink2); padding: 9px 14px; font: inherit; font-size: 14px; cursor: pointer; }
-  .toggle button.on { background: var(--surf2); color: var(--ink); }
-  .money { font-family: var(--serif); font-size: 30px; }
-  .money.neg { color: var(--bad); } .money.pos { color: var(--good); }
-  table.tape { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 14px; }
-  .tape td, .tape th { padding: 8px 6px; border-top: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
-  .tape th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-  .tag { font-family: var(--mono); font-size: 12px; border-radius: 6px; padding: 2px 7px; }
-  .tag.bounced { background: rgba(224,113,94,.16); color: #f4b7aa; } .tag.kept_falling { background: rgba(108,195,142,.16); color: #b3e6c6; } .tag.flat { background: rgba(226,176,74,.12); color: #efd49a; }
-
-  .verdict { font-family: var(--serif); font-size: 28px; }
-  .verdict.sell { color: var(--bad); } .verdict.hold { color: var(--patina); }
-  .facts dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; font-size: 14px; }
-  .facts dt { color: var(--muted); } .facts dd { font-family: var(--mono); text-align: right; }
-  .agree { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; border-radius: 999px; padding: 5px 12px; margin-top: 12px; }
-  .agree.yes { background: #16261d; color: var(--good); } .agree.no { background: #2d1713; color: var(--bad); }
-  .receipt { font-family: var(--mono); font-size: 14px; border-top: 1px solid var(--line); padding: 12px 0; }
-
-  .score { width: 100%; border-collapse: collapse; }
-  .score td, .score th { padding: 12px 8px; border-top: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
-  .score th { color: var(--muted); font-weight: 500; font-size: 13px; }
-  .score .big { font-family: var(--serif); font-size: 24px; }
-  footer { border-top: 1px solid var(--line); padding: 30px 0 60px; color: var(--muted); font-size: 14px; }
-  footer ul { padding-left: 18px; display: grid; gap: 6px; max-width: 80ch; }
+  .chip { border: 0; background: var(--soft); color: var(--ink2); border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip:hover { background: #e9e6ff; color: var(--purple); }
+  .row { display: flex; gap: 14px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+  .btn { background: var(--purple); color: #fff; border: 0; border-radius: 12px; padding: 13px 22px; font: inherit; font-weight: 500; font-size: 15px; cursor: pointer; box-shadow: 0 10px 24px rgba(108,92,245,.3); }
+  .btn:disabled { opacity: .55; cursor: wait; }
+  .btn.alt { background: var(--card); color: var(--purple); box-shadow: none; border: 1.5px solid #dcd7ff; }
+  .note { color: var(--muted); font-size: 13px; }
+  .err { color: var(--pink); }
   .hidden { display: none !important; }
-  @media (max-width: 860px) { .hero, .grid2 { grid-template-columns: 1fr; } .step-h { flex-wrap: wrap; } .step-h p { margin-left: 0; text-align: left; } .strip { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .bub { transition: none; } }
+
+  .canvas { position: relative; border-radius: 18px; overflow: hidden; min-height: 400px;
+    background-color: #f3f4fd;
+    background-image: radial-gradient(circle at 1px 1px, #d9dbf3 1.6px, transparent 1.7px);
+    background-size: 14px 14px; }
+  .canvas svg.arcs { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .node { position: absolute; transform: translate(-50%, -100%); display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 12px; padding: 10px 14px 10px 10px; box-shadow: var(--shadow); white-space: nowrap; transition: all .35s ease; }
+  .node::after { content: ""; position: absolute; left: 50%; bottom: -7px; width: 14px; height: 14px; background: var(--card); transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+  .node .ic { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--c); flex: none; }
+  .node .t { font-size: 12px; color: var(--ink2); line-height: 1.2; }
+  .node .v { font-size: 15px; font-weight: 600; line-height: 1.25; }
+  .node.pass { outline: 2px solid var(--green); }
+  .node.fail { outline: 2px solid var(--pink); }
+  .node.dim { opacity: .45; }
+  .hex { position: absolute; width: 16px; height: 18px; transform: translate(-50%, -50%); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); background: var(--c); }
+  .holdtag { position: absolute; transform: translate(-50%, 0); font-size: 11px; color: var(--muted); background: rgba(255,255,255,.85); padding: 1px 7px; border-radius: 6px; }
+  .holdtag.on { color: #fff; background: var(--pink); }
+  .flowlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 34px; margin-top: 14px; }
+  .ck { display: grid; grid-template-columns: 10px 1fr auto; gap: 14px; align-items: start; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .ck .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); margin-top: 8px; }
+  .ck b { font-weight: 500; display: block; }
+  .ck span { color: var(--muted); font-size: 13px; }
+  .who { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-radius: 6px; padding: 3px 8px; }
+  .who.you { background: #fff1e9; color: var(--orange); }
+  .who.talos { background: #efedff; color: var(--purple); }
+  .summary { font-size: 18px; font-weight: 500; }
+
+  .rgrid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+  .tiles { display: grid; gap: 16px; align-content: start; }
+  .tile { border-radius: 16px; color: #fff; padding: 22px; display: flex; flex-direction: column; justify-content: center; min-height: 118px; box-shadow: var(--shadow); }
+  .tile .ic { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,.22); display: grid; place-items: center; margin-bottom: 10px; }
+  .tile b { font-size: 26px; font-weight: 600; line-height: 1.1; }
+  .tile span { font-size: 13px; opacity: .92; }
+  .toggle { display: inline-flex; background: var(--card); border-radius: 12px; padding: 4px; box-shadow: var(--shadow); }
+  .toggle button { background: none; border: 0; border-radius: 9px; padding: 8px 14px; font: inherit; font-size: 13px; color: var(--ink2); cursor: pointer; }
+  .toggle button.on { background: var(--purple); color: #fff; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink2); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--c); }
+  #chart { width: 100%; height: 360px; display: block; margin-top: 10px; }
+  table.tape { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  .tape td, .tape th { padding: 11px 6px; border-bottom: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
+  .tape th { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .pill { border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .pill.bounced { background: #ffe8ec; color: var(--pink); } .pill.kept_falling { background: #e3f8ef; color: #1c9e6f; } .pill.flat { background: #fff6d8; color: #a98300; }
+
+  .wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+  .verdict { font-size: 34px; font-weight: 600; }
+  .verdict.sell { color: var(--pink); } .verdict.hold { color: var(--purple); }
+  dl.facts { display: grid; grid-template-columns: 1fr auto; font-size: 14px; }
+  dl.facts dt, dl.facts dd { padding: 9px 0; border-bottom: 1px solid var(--line); }
+  dl.facts dt { color: var(--ink2); } dl.facts dd { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .agree { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 500; margin-top: 16px; }
+  .agree.yes { background: #e3f8ef; color: #1c9e6f; } .agree.no { background: #ffe8ec; color: var(--pink); }
+
+  .receipt { display: grid; grid-template-columns: 44px 1fr auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .receipt .ic { width: 44px; height: 44px; border-radius: 12px; background: var(--orange); display: grid; place-items: center; }
+  table.score { width: 100%; border-collapse: collapse; }
+  .score td, .score th { padding: 14px 8px; border-bottom: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
+  .score th { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .score .big { font-size: 22px; font-weight: 600; }
+  .callout { border-radius: 14px; padding: 18px 20px; margin-top: 18px; background: #ffeef1; }
+  .callout b { color: var(--pink); }
+  footer { padding: 46px 0 70px; color: var(--ink2); font-size: 13px; }
+  footer ul { padding-left: 18px; display: grid; gap: 6px; max-width: 90ch; }
+  @media (max-width: 1000px) { .hero { grid-template-columns: 1fr 1fr; } .pitch { grid-column: 1 / -1; order: -1; padding: 0; } .rgrid, .wgrid { grid-template-columns: 1fr; } .tabs, .search { display: none; } }
+  @media (max-width: 640px) { .hero { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .node { transition: none; } }
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap">
-  <div class="mark">Talos<i>.</i></div>
-  <div class="strip" id="strip"><span class="pill">reading Robinhood Chain…</span></div>
-</div></header>
+<nav class="top"><div class="wrap">
+  <div class="logo"><span class="m"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>Talos</div>
+  <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9597bd" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Robinhood Chain · NVDA / USDG</span></div>
+  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a></div>
+</div></nav>
 
 <main class="wrap">
   <div class="hero">
-    <div>
-      <h1>Tokenized Nvidia still trades <em>when Wall Street is dark.</em></h1>
-      <p>Write a rule for your stock tokens in plain English. SERV Reasoning turns it into a flowchart you can read and approve, not a black-box bot, and replays it on every real night and weekend before it can touch your money. Then Talos keeps watch, and sells on Robinhood Chain only when your rule and the market both say so.</p>
+    <div class="card">
+      <div class="label">NVDA token on Robinhood Chain</div>
+      <div class="price" id="hprice">—</div>
+      <div class="label" id="hclose">Reading the chain…</div>
+      <div class="bars" id="hbars"></div>
+      <div class="label">Last 24 hours, one bar per hour</div>
     </div>
-    <div class="myth">
-      <div class="k">Why Talos</div>
-      <p>In Greek myth, Talos was a bronze guardian who circled Crete three times a day, keeping watch while everyone slept.</p>
-      <div class="facts">
-        <div><b>80%</b><span>of the week the US market is shut</span></div>
-        <div><b>24/7</b><span>stock tokens trade on-chain</span></div>
-        <div><b>0</b><span>brokers that sell for you on Sunday</span></div>
+    <div class="card">
+      <div class="ring">
+        <svg width="74" height="74" viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="#eceefa" stroke-width="7"/><circle cx="37" cy="37" r="31" fill="none" stroke="#6c5cf5" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="39" transform="rotate(-90 37 37)"/><text x="37" y="42" text-anchor="middle" font-size="15" font-weight="600" fill="#2b2d5c">80%</text></svg>
+        <div><div class="label">of every week</div><b>the US market is shut</b></div>
       </div>
+      <div class="meter" id="hmeter"></div>
+    </div>
+    <div class="pitch">
+      <h1>Your broker sleeps 80% of the week. <em>Talos doesn't.</em></h1>
+      <p>Write a rule in plain English. SERV Reasoning turns it into a flowchart you approve, and Talos replays it on every real night and weekend first. Then it keeps watch, and sells your NVDA on Robinhood Chain only when your rule and the market both say so.</p>
+      <div class="state" id="hstate"><i></i><span>Checking the market…</span></div>
     </div>
   </div>
 
-  <section class="step">
-    <div class="step-h"><span class="n">01</span><h2>Your rule</h2><p>Talos only sells NVDA for USDG, from one small capped wallet.</p></div>
-    <textarea id="rule">If Nvidia drops 3% while the market is closed, sell half.</textarea>
-    <div class="chips">
-      <button class="chip" data-r="If Nvidia drops 3% while the market is closed, sell half.">Sell half on a 3% dip</button>
-      <button class="chip" data-r="Sell everything if NVDA falls 5% over a weekend, but never more than $500 in one go.">Weekend, with a $500 cap</button>
-      <button class="chip" data-r="Sell $20 of Nvidia on any drop at night, even a small one.">Any drop at night</button>
+  <section id="rule">
+    <div class="sh"><span class="n">1</span><h2>Your rule</h2><p>Talos can only sell NVDA for USDG, from one small wallet with a cap.</p></div>
+    <div class="card">
+      <textarea id="ruletext">If Nvidia drops 3% while the market is closed, sell half.</textarea>
+      <div class="chips">
+        <button class="chip" data-r="If Nvidia drops 3% while the market is closed, sell half.">Sell half on a 3% dip</button>
+        <button class="chip" data-r="Sell everything if NVDA falls 5% over a weekend, but never more than $500 in one go.">Weekend, $500 cap</button>
+        <button class="chip" data-r="Sell $20 of Nvidia on any drop at night, even a small one.">Any drop at night</button>
+      </div>
+      <div class="row"><button class="btn" id="build">Build my flowchart with SERV</button><span class="note" id="buildnote">SERV reads your rule, keeps your numbers exactly, and adds the checks you didn't think of.</span></div>
     </div>
-    <div class="row"><button class="go" id="build">Build my flowchart with SERV</button><span class="note" id="buildnote">SERV Reasoning compiles your rule and checks every number came from your words. About 20–30 seconds.</span></div>
   </section>
 
-  <section class="step hidden" id="s2">
-    <div class="step-h"><span class="n">02</span><h2>Your flowchart</h2><p>Every diamond must say yes before Talos sells. Checks marked Talos were added by SERV, with the reason.</p></div>
-    <div class="card" id="graph"></div>
-    <div class="card" style="margin-top:18px"><div class="summary" id="summary"></div><div class="checkgrid" id="checks"></div><div id="assume" class="note" style="margin-top:10px"></div></div>
+  <section id="flow" class="hidden">
+    <div class="sh"><span class="n">2</span><h2>Your flowchart</h2><p>Every check must say yes before Talos sells. Any no means hold.</p></div>
+    <div class="card" style="padding:0"><div class="canvas" id="canvas"></div></div>
+    <div class="card" style="margin-top:24px"><div class="summary" id="summary"></div><div class="flowlist" id="checks"></div><div class="note" id="assume" style="margin-top:12px"></div></div>
   </section>
 
-  <section class="step hidden" id="s3">
-    <div class="step-h"><span class="n">03</span><h2>What your rule would have done</h2><p>Every real night and weekend in the NVDA/USDG pool since it opened on 21 July. History, not a forecast.</p></div>
-    <div class="row" style="margin: 0 0 16px"><div class="toggle"><button class="on" data-v="talos">With Talos's checks</button><button data-v="rule">Your rule alone</button></div><span class="note" id="stretchnote"></span></div>
-    <div class="grid2">
-      <div class="card"><div class="bubbles" id="bubbles"></div></div>
+  <section id="replay" class="hidden">
+    <div class="sh"><span class="n">3</span><h2>What your rule would have done</h2><p id="stretchnote"></p></div>
+    <div class="row" style="margin: 0 0 18px"><div class="toggle"><button class="on" data-v="talos">With Talos's checks</button><button data-v="rule">Your rule alone</button></div><span class="note">History from the NVDA/USDG pool since it opened on 21 July. Not a forecast.</span></div>
+    <div class="rgrid">
+      <div class="tiles">
+        <div class="tile" style="background: var(--purple)"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><b id="t1">—</b><span>times your rule would have sold</span></div>
+        <div class="tile" style="background: var(--cyan)"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></div><b id="t2">—</b><span>of those, the price came back by the open</span></div>
+        <div class="tile" style="background: var(--orange)"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4.5a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3H15"/></svg></div><b id="t3">—</b><span>against simply holding, per $1,000</span></div>
+      </div>
       <div class="card">
-        <div class="note">Against simply holding, per $1,000 of NVDA</div>
-        <div class="money" id="money"></div>
-        <p class="note" id="moneynote" style="margin-top:6px"></p>
+        <div class="row" style="margin:0; justify-content: space-between"><b style="font-weight:600">Every night and weekend</b>
+          <div class="legend"><span style="--c: var(--purple2)"><i></i>Never sold</span><span style="--c: var(--pink)"><i></i>Sold, it came back</span><span style="--c: var(--green)"><i></i>Sold, it kept falling</span><span style="--c: var(--yellow)"><i></i>Sold, ended flat</span></div></div>
+        <svg id="chart" viewBox="0 0 760 360" preserveAspectRatio="none"></svg>
+        <div class="note">Each bubble is one closed stretch: how far NVDA dipped below the last close. Bigger bubbles are weekends.</div>
         <table class="tape" id="tape"></table>
       </div>
     </div>
   </section>
 
-  <section class="step hidden" id="s4">
-    <div class="step-h"><span class="n">04</span><h2>Approve, then Talos keeps watch</h2><p>A small, cheap model walks your graph through SERV on every check. Code evaluates the same graph; a sale needs both to agree.</p></div>
-    <div class="row" style="margin-top:0"><button class="go" id="approve">Approve this flowchart</button><button class="ghost hidden" id="walk">Check the market now</button><span class="note" id="walknote"></span></div>
-    <div class="hidden" id="live" style="margin-top:18px">
-      <div class="card" id="graph2"></div>
-      <div class="card facts" style="margin-top:18px; display:grid; grid-template-columns: 1fr 1fr; gap: 28px">
-        <div>
-        <div class="verdict" id="verdict"></div>
-        <p id="reason" style="margin:8px 0 14px; color: var(--ink2)"></p>
-        <div id="agree"></div>
-        </div>
-        <dl id="factlist"></dl>
+  <section id="watch" class="hidden">
+    <div class="sh"><span class="n">4</span><h2>Approve, then Talos keeps watch</h2><p>A small, cheap model walks your flowchart through SERV. Talos's code walks it too. A sale needs both to agree.</p></div>
+    <div class="row" style="margin-top:0"><button class="btn" id="approve">Approve this flowchart</button><button class="btn alt hidden" id="walk">Check the market now</button><span class="note" id="walknote"></span></div>
+    <div id="live" class="hidden">
+      <div class="card" style="padding:0; margin-top:24px"><div class="canvas" id="canvas2"></div></div>
+      <div class="wgrid">
+        <div class="card"><div class="label">Talos decided</div><div class="verdict" id="verdict"></div><p id="reason" style="color: var(--ink2); margin-top: 6px"></p><div id="agree"></div></div>
+        <div class="card"><dl class="facts" id="factlist"></dl></div>
       </div>
     </div>
   </section>
 
-  <section class="step" id="s5">
-    <div class="step-h"><span class="n">05</span><h2>Receipts</h2><p>Real sales by Talos on Robinhood Chain mainnet, from the capped Talos wallet. This page cannot sell; the guard runs separately.</p></div>
-    <div class="card" id="receipts"><span class="note">No sale yet.</span></div>
+  <section id="receipts">
+    <div class="sh"><span class="n">5</span><h2>Receipts</h2><p>Real sales on Robinhood Chain mainnet. This page can't sell; the guard runs separately with a cap.</p></div>
+    <div class="card" id="rlist"><span class="note">No sale yet.</span></div>
   </section>
 
-  <section class="step" id="s6">
-    <div class="step-h"><span class="n">06</span><h2>Does SERV earn its keep?</h2><p>The same graph walks, over real closed-market moments, scored against the code's exact answer.</p></div>
-    <div class="card" id="score"><span class="note">Scoreboard loading…</span></div>
+  <section id="score">
+    <div class="sh"><span class="n">6</span><h2>Does it hold up?</h2><p>The same flowchart walked over 40 real and awkward moments, scored against Talos's code.</p></div>
+    <div class="card" id="sboard"><span class="note">Loading…</span></div>
   </section>
 </main>
 
 <footer><div class="wrap">
   <ul>
-    <li><b>Not advice.</b> Talos follows the rule you approve. It does not predict prices, and the replay is history, not a forecast.</li>
-    <li>The replay covers the NVDA/USDG pool's life so far (from 21 July 2026), 15-minute prices from GeckoTerminal. That is a small sample; the counts are shown so you can judge it.</li>
-    <li>The market is treated as shut outside 09:30–16:00 New York time on weekdays. US holidays show up as longer stretches.</li>
-    <li>Sales go through Uniswap on Robinhood Chain, from one wallet with a per-sale cap, and only after a dry run passes.</li>
-    <li>Built for the OpenServ SERV Hackathon · <a href="https://github.com/imprint-hash/talos">source</a></li>
+    <li><b>Not advice.</b> Talos follows the rule you approve. It doesn't predict prices. The replay is history, not a forecast.</li>
+    <li>History: every 15-minute price of the NVDA/USDG Uniswap pool on Robinhood Chain since 21 July 2026, from GeckoTerminal. 48 closed stretches is a small sample; the counts are shown so you can judge it.</li>
+    <li>The market counts as shut outside 09:30–16:00 New York time on weekdays. US holidays show up as longer stretches.</li>
+    <li>Sales go through Uniswap from one capped wallet, after a dry run, and only when the model and the code agree.</li>
+    <li>Built with SERV Reasoning for the OpenServ SERV Hackathon · <a href="https://github.com/imprint-hash/talos">source on GitHub</a></li>
   </ul>
 </div></footer>
 
-<script type="module">
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: {
-  background: "#17140f", primaryColor: "#221c14", primaryBorderColor: "#6b5134", primaryTextColor: "#f3ece2",
-  lineColor: "#6b5134", fontFamily: "IBM Plex Sans", fontSize: "15px" } });
-
+<script>
 const $ = s => document.querySelector(s);
-let state = { plan: null, data: null, view: "talos" };
-const fmt = (n, d = 2) => (n > 0 ? "+" : "") + n.toFixed(d);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sign = (n, d = 2) => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toFixed(d);
+let state = { plan: null, data: null, view: "talos", walk: null };
 
 async function api(path, payload) {
   const r = await fetch(path, payload ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) } : undefined);
-  const t = await r.text(); let j; try { j = JSON.parse(t); } catch { throw new Error("The server did not answer properly. Try again."); }
+  const t = await r.text(); let j; try { j = JSON.parse(t); } catch { throw new Error("The server didn't answer properly. Try again."); }
   if (!r.ok) throw new Error(j.error || "Request failed");
   return j;
 }
 
-async function draw(el, code, id) {
-  const { svg } = await mermaid.render(id + Date.now(), code);
-  el.innerHTML = svg;
+const KIND = {
+  start: { c: "var(--cyan)", t: "Price update", icon: '<path d="M4 17l5-5 4 4 7-7"/>' },
+  market_closed: { c: "var(--purple)", t: "US market", icon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>' },
+  drop_from_close: { c: "var(--pink)", t: "Drop since close", icon: '<path d="M4 7l6 6 4-4 6 6M20 10v5h-5"/>' },
+  move_vs_normal_day: { c: "var(--orange)", t: "Bigger than a normal day", icon: '<path d="M3 12h4l3-8 4 16 3-8h4"/>' },
+  price_impact: { c: "var(--cyan)", t: "Fair sell price", icon: '<path d="M4 20h16M7 16V9M12 16V5M17 16v-4"/>' },
+  already_fired: { c: "var(--green)", t: "Once per stretch", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>' },
+  size_cap: { c: "var(--yellow)", t: "Sale size", icon: '<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 10h16"/>' },
+  sell: { c: "var(--orange)", t: "Then", icon: '<path d="M5 12h14M13 6l6 6-6 6"/>' },
+};
+const icon = k => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${KIND[k].icon}</svg>`;
+function condition(c) {
+  switch (c.type) {
+    case "market_closed": return "is shut";
+    case "drop_from_close": return `down ${c.threshold}% or more`;
+    case "move_vs_normal_day": return `at least ${c.threshold}× a normal day`;
+    case "price_impact": return `moves price ≤ ${c.threshold}%`;
+    case "already_fired": return "not sold yet";
+    case "size_cap": return `$${c.threshold} or less`;
+  }
+  return c.label;
 }
 
-// ── header strip ──
-function strip(s) {
+// The flowchart, drawn as pins joined by arcs. Any "no" drops to a hold.
+function drawFlow(el, plan, walk) {
+  const nodes = [{ id: "S", kind: "start", t: "Price update", v: "every check" }, ...plan.checks.map(c => ({ id: c.id, kind: c.type, t: KIND[c.type].t, v: condition(c) })), { id: "SELL", kind: "sell", t: "Then", v: `sell ${plan.action.sell_pct}% for USDG` }];
+  const W = el.clientWidth || 1100, narrow = W < 900;
+  const H = narrow ? 80 + nodes.length * 110 : 430;
+  el.style.height = H + "px";
+  const lanes = [260, 150, 320, 170, 300, 160, 290, 190];
+  const pts = nodes.map((n, i) => narrow ? [W * (i % 2 ? .6 : .4), 90 + i * 110] : [120 + (W - 290) * (i / (nodes.length - 1)), lanes[i % 8]]);
+  const status = {}; let failAt = -1;
+  if (walk) walk.path.forEach((p, i) => { status[p.check] = p.passed ? "pass" : "fail"; if (!p.passed && failAt < 0) failAt = i + 1; });
+  const lit = i => !walk || failAt < 0 || i <= failAt;
+  let svg = `<svg class="arcs" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="grad-${el.id}" x1="0" x2="1"><stop offset="0" stop-color="#6c5cf5"/><stop offset="1" stop-color="#e25cc8"/></linearGradient></defs>`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x1, y1] = pts[i], [x2, y2] = pts[i + 1];
+    const d = narrow ? `M${x1},${y1} C${x1},${(y1 + y2) / 2} ${x2},${(y1 + y2) / 2} ${x2},${y2}` : `M${x1},${y1} C${x1 + (x2 - x1) * .3},${Math.min(y1, y2) - 70} ${x1 + (x2 - x1) * .7},${Math.min(y1, y2) - 70} ${x2},${y2}`;
+    const on = lit(i + 1);
+    svg += `<path d="${d}" fill="none" stroke="url(#grad-${el.id})" stroke-width="${on ? 2.6 : 1.4}" opacity="${on ? 1 : .22}"/>`;
+  }
+  plan.checks.forEach((c, i) => { const [x, y] = pts[i + 1]; svg += `<path d="M${x},${y} L${x},${y + 50}" stroke="${status[c.id] === "fail" ? "#f25c78" : "#c7c9ec"}" stroke-width="1.4" stroke-dasharray="3 4"/>`; });
+  svg += "</svg>";
+  let html = svg;
+  nodes.forEach((n, i) => {
+    const [x, y] = pts[i];
+    const st = status[n.id] || (n.id === "SELL" && walk && failAt < 0 ? "pass" : "");
+    html += `<div class="hex" style="left:${x}px;top:${y}px;--c:${KIND[n.kind].c}"></div>`;
+    html += `<div class="node ${st}${walk && !lit(i) ? " dim" : ""}" style="left:${x}px;top:${y - 14}px"><span class="ic" style="--c:${KIND[n.kind].c}">${icon(n.kind)}</span><span><span class="t">${esc(n.t)}</span><br><span class="v">${esc(n.v)}</span></span></div>`;
+  });
+  plan.checks.forEach((c, i) => { const [x, y] = pts[i + 1]; html += `<span class="holdtag ${status[c.id] === "fail" ? "on" : ""}" style="left:${x}px;top:${y + 52}px">no → hold</span>`; });
+  el.innerHTML = html;
+}
+
+function hero(s) {
   if (!s) return;
-  const f = s.facts, closed = f.market_closed;
-  $("#strip").innerHTML = `
-    <span class="pill ${closed ? "closed" : "open"}">US market <b>${closed ? (f.stretch === "weekend" ? "shut · weekend" : "shut · night") : "open"}</b></span>
-    <span class="pill">NVDA token <b>$${s.price.toFixed(2)}</b></span>
-    <span class="pill">since close <b>${fmt(-f.drop_from_close_pct)}%</b></span>
-    <span class="pill">normal day <b>${f.normal_day_pct}%</b></span>`;
+  const f = s.facts;
+  $("#hprice").innerHTML = `$${s.price.toFixed(2)}<small class="${f.drop_from_close_pct > 0 ? "down" : "up"}">${f.drop_from_close_pct > 0 ? "▼" : "▲"} ${Math.abs(f.drop_from_close_pct).toFixed(2)}%</small>`;
+  $("#hclose").textContent = `since the last US close, $${s.last_close?.toFixed(2)}`;
+  if (s.candles?.length) {
+    const hrs = s.candles.filter((_, i) => i % 4 === 3).slice(-24);
+    const vals = hrs.map(c => c[1]), lo = Math.min(...vals), hi = Math.max(...vals);
+    $("#hbars").innerHTML = hrs.map((c, i) => { const h = 18 + 78 * ((c[1] - lo) / ((hi - lo) || 1)); const up = i === 0 || c[1] >= hrs[i - 1][1]; return `<i style="height:${h}px;background:${up ? "var(--purple)" : "var(--pink)"}"></i>`; }).join("");
+  }
+  const m = [["Since the last close", `${sign(-f.drop_from_close_pct)}%`, Math.min(1, Math.abs(f.drop_from_close_pct) / 5), "var(--pink)"],
+             ["A normal day for NVDA", `${f.normal_day_pct}%`, Math.min(1, f.normal_day_pct / 5), "var(--purple)"],
+             ["Price moved by a $500 sale", `${f.price_impact_pct}%`, Math.min(1, f.price_impact_pct), "var(--orange)"]];
+  $("#hmeter").innerHTML = m.map(([k, v, p, c]) => `<span class="k" style="--c:${c}">${k}</span><span class="bar" style="--c:${c}"><i style="width:${Math.max(4, p * 100)}%"></i></span><span class="v">${v}</span>`).join("");
+  $("#hstate").className = "state" + (f.market_closed ? "" : " open");
+  $("#hstate span").textContent = f.market_closed ? `US market shut (${f.stretch}). NVDA is still trading on Robinhood Chain.` : "The US market is open right now.";
 }
-
-// ── scoreboard + receipts ──
 function receipts(list) {
   if (!list?.length) return;
-  $("#receipts").innerHTML = list.map(r => `<div class="receipt">${esc(r.when)} · ${esc(r.what)} · <a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.hash.slice(0, 10))}…</a><br><span class="note">${esc(r.why || "")}</span></div>`).join("");
+  $("#rlist").innerHTML = list.map(r => `<div class="receipt"><span class="ic">${icon("sell")}</span><div><b style="font-weight:600">${esc(r.what)}</b><br><span class="note">${esc(r.when)} · ${esc(r.why)}</span><br><span class="note">Rule: ${esc(r.rule)}</span></div><a href="${esc(r.link)}" target="_blank" rel="noopener">View on Robinhood Chain →</a></div>`).join("");
 }
 function scoreboard(sb) {
-  if (!sb) { $("#score").innerHTML = `<span class="note">Scoreboard not published yet.</span>`; return; }
-  $("#score").innerHTML = `<table class="score"><tr><th>Setup</th><th>Walked the graph exactly right</th><th>Cost per 1,000 checks</th><th>Avg time</th></tr>` +
-    sb.rows.map(r => `<tr><td>${esc(r.label)}</td><td class="big">${r.correct}/${r.total}</td><td>$${r.cost_per_1000.toFixed(2)}</td><td>${(r.ms / 1000).toFixed(1)}s</td></tr>`).join("") +
-    `</table><p style="margin-top:16px; font-family: var(--serif); font-size: 20px">${esc(sb.finding || "")}</p>` +
-    (sb.trap ? `<div class="card" style="margin-top:14px; background: #1d1511; border-color:#4a2d22"><b style="color:#f4b7aa">The night that fooled every model</b><p style="margin-top:6px; color: var(--ink2)">${esc(sb.trap)}</p></div>` : "") +
-    `<p class="note" style="margin-top:12px">${esc(sb.note)}${sb.prose ? " " + esc(sb.prose.note) : ""}</p>`;
+  if (!sb) { $("#sboard").innerHTML = `<span class="note">Not published yet.</span>`; return; }
+  $("#sboard").innerHTML = `<table class="score"><tr><th>Setup</th><th>Right answers</th><th>Cost per 1,000 checks</th><th>Average time</th></tr>` +
+    sb.rows.map(r => `<tr><td>${esc(r.label)}</td><td class="big">${r.correct}/${r.total}</td><td>$${r.cost_per_1000.toFixed(2)}</td><td>${(r.ms / 1000).toFixed(1)}s</td></tr>`).join("") + `</table>` +
+    `<p class="summary" style="margin-top:18px">${esc(sb.finding || "")}</p>` +
+    (sb.trap ? `<div class="callout"><b>The night that fooled every model.</b> <span style="color: var(--ink2)">${esc(sb.trap)}</span></div>` : "") +
+    `<p class="note" style="margin-top:14px">${esc(sb.note)}${sb.prose ? " " + esc(sb.prose.note) : ""}</p>`;
 }
-api("/api/status").then(j => { strip(j.snapshot); receipts(j.receipts); scoreboard(j.scoreboard); }).catch(() => {});
+api("/api/status").then(j => { hero(j.snapshot); receipts(j.receipts); scoreboard(j.scoreboard); }).catch(() => {});
 
-// ── step 1 → 2 → 3 ──
-document.querySelectorAll(".chip").forEach(b => b.onclick = () => { $("#rule").value = b.dataset.r; });
+document.querySelectorAll(".chip").forEach(b => b.onclick = () => { $("#ruletext").value = b.dataset.r; });
 $("#build").onclick = async () => {
-  const btn = $("#build"); btn.disabled = true; $("#buildnote").textContent = "SERV is reading your rule and building the graph…"; $("#buildnote").classList.remove("err");
+  const btn = $("#build"); btn.disabled = true; $("#buildnote").classList.remove("err");
+  $("#buildnote").textContent = "SERV is reading your rule and building the flowchart. This takes 20–30 seconds.";
   try {
-    const d = await api("/api/compile", { rule: $("#rule").value });
-    state = { ...state, plan: d.plan, data: d };
-    $("#s2").classList.remove("hidden"); $("#s3").classList.remove("hidden"); $("#s4").classList.remove("hidden");
-    await draw($("#graph"), d.mermaid, "g");
+    const d = await api("/api/compile", { rule: $("#ruletext").value });
+    state = { ...state, plan: d.plan, data: d, walk: null };
+    ["#flow", "#replay", "#watch"].forEach(s => $(s).classList.remove("hidden"));
+    drawFlow($("#canvas"), d.plan);
     $("#summary").textContent = d.plan.summary;
-    $("#checks").innerHTML = d.plan.checks.map(c => `<div class="check"><span class="who ${c.added_by}">${c.added_by === "you" ? "you" : "talos"}</span><div><b>${esc(c.label)}</b><span>${esc(c.why)}</span></div></div>`).join("");
+    $("#checks").innerHTML = d.plan.checks.map(c => `<div class="ck" style="--c:${KIND[c.type].c}"><span class="dot"></span><div><b>${esc(c.label)}</b><span>${esc(c.why)}</span></div><span class="who ${c.added_by}">${c.added_by === "you" ? "You" : "Talos"}</span></div>`).join("");
     const extra = [...(d.plan.assumptions || []).map(a => "Assumed: " + a), ...(d.plan.unclear || []).map(u => "Unclear: " + u)];
-    $("#assume").innerHTML = extra.length ? extra.map(esc).join("<br>") : "";
-    $("#buildnote").textContent = `Compiled by ${d.meta.model} through SERV in ${(d.meta.ms / 1000).toFixed(1)}s.`;
-    replayView(); $("#s2").scrollIntoView({ behavior: "smooth" });
-    $("#approve").classList.remove("hidden"); $("#walk").classList.add("hidden"); $("#live").classList.add("hidden");
+    $("#assume").innerHTML = extra.map(esc).join("<br>");
+    $("#buildnote").textContent = d.meta.saved ? `Compiled by ${d.meta.model} through SERV and saved as an example. Write your own rule for a fresh compile.` : `Compiled by ${d.meta.model} through SERV in ${(d.meta.ms / 1000).toFixed(1)}s.`;
+    replayView();
+    $("#approve").classList.remove("hidden"); $("#walk").classList.add("hidden"); $("#live").classList.add("hidden"); $("#walknote").textContent = "";
+    $("#flow").scrollIntoView({ behavior: "smooth" });
   } catch (e) { $("#buildnote").textContent = e.message; $("#buildnote").classList.add("err"); }
   btn.disabled = false;
 };
+window.addEventListener("resize", () => { if (state.plan) { drawFlow($("#canvas"), state.plan); if (state.walk) drawFlow($("#canvas2"), state.plan, state.walk); } });
 
 document.querySelectorAll(".toggle button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".toggle button").forEach(x => x.classList.toggle("on", x === b));
   state.view = b.dataset.v; replayView();
 });
-
 function replayView() {
   const r = state.view === "talos" ? state.data.replay : state.data.replay_rule_only;
-  $("#stretchnote").textContent = `${r.stretches} closed stretches: ${r.weekends} weekends and ${r.nights} nights.`;
-  const kinds = [["never", "never fired"], ["bounced", "sold, then it bounced back"], ["kept_falling", "sold, and it kept falling"], ["flat", "sold, it ended flat"]];
-  const spots = [[30, 50], [72, 30], [72, 74], [48, 84]];
-  const max = Math.max(...kinds.map(([k]) => r[k]), 1);
-  $("#bubbles").innerHTML = kinds.map(([k, label], i) => {
-    const n = r[k]; if (!n && k !== "never") return "";
-    const size = 70 + 170 * Math.sqrt(n / max);
-    return `<div class="bub ${k}" style="left:${spots[i][0]}%;top:${spots[i][1]}%;width:${size}px;height:${size}px"><div><b>${n}</b><span>${label}</span></div></div>`;
-  }).join("");
-  const m = r.net_vs_holding_usd;
-  $("#money").textContent = (m >= 0 ? "+$" : "−$") + Math.abs(m).toFixed(2);
-  $("#money").className = "money " + (m > 0.005 ? "pos" : m < -0.005 ? "neg" : "");
   const fired = r.results.filter(x => x.outcome !== "never");
-  $("#moneynote").textContent = fired.length ? `Fired ${fired.length} time${fired.length > 1 ? "s" : ""}. Negative means selling did worse than holding to the next open.` : "Your rule never fired in this history. That is common: NVDA rarely moves far while the market is shut.";
-  $("#tape").innerHTML = fired.length ? `<tr><th>Stretch</th><th>Sold at</th><th>By the open</th><th></th></tr>` + fired.map(x => `<tr><td>${x.kind} · ${esc(x.label)}</td><td>−${x.fired_drop_pct}%</td><td>${fmt(x.after_pct)}%</td><td><span class="tag ${x.outcome}">${x.outcome.replace("_", " ")}</span></td></tr>`).join("") : "";
+  $("#stretchnote").textContent = `${r.stretches} closed stretches: ${r.weekends} weekends and ${r.nights} nights.`;
+  $("#t1").textContent = fired.length;
+  $("#t2").textContent = `${r.bounced} of ${fired.length}`;
+  $("#t3").textContent = (r.net_vs_holding_usd >= 0 ? "+$" : "−$") + Math.abs(r.net_vs_holding_usd).toFixed(2);
+  const W = 760, H = 360, pad = { l: 46, r: 16, t: 20, b: 34 };
+  const lo = Math.min(-5, ...r.results.map(x => x.deepest_pct));
+  const y = v => pad.t + (H - pad.t - pad.b) * (v / lo);
+  const x = i => pad.l + (W - pad.l - pad.r) * (i / Math.max(1, r.results.length - 1));
+  const col = { never: "#8f7bff", bounced: "#f25c78", kept_falling: "#2fc48d", flat: "#f4cf2f" };
+  let g = "";
+  for (let v = 0; v >= lo; v -= 1) g += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="#eceefa"/><text x="${pad.l - 8}" y="${y(v) + 4}" font-size="11" fill="#9597bd" text-anchor="end">${v}%</text>`;
+  const trig = state.plan.checks.find(c => c.type === "drop_from_close")?.threshold;
+  if (trig) g += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(-trig)}" y2="${y(-trig)}" stroke="#f25c78" stroke-dasharray="5 5"/><text x="${W - pad.r}" y="${y(-trig) - 6}" font-size="11" fill="#f25c78" text-anchor="end">your trigger −${trig}%</text>`;
+  const months = {}; r.results.forEach((s, i) => { const m = s.label.split(" ").slice(-1)[0]; if (!(m in months)) months[m] = i; });
+  Object.entries(months).forEach(([m, i]) => g += `<text x="${x(i)}" y="${H - 10}" font-size="11" fill="#9597bd">${m}</text>`);
+  r.results.map((s, i) => [s, i]).sort((a, b) => (b[0].outcome === "never") - (a[0].outcome === "never")).forEach(([s, i]) => {
+    const rad = (s.kind === "weekend" ? 14 : 7) + Math.min(20, Math.abs(Math.min(0, s.deepest_pct)) * 4);
+    g += `<circle cx="${x(i)}" cy="${y(Math.min(0, s.deepest_pct))}" r="${rad}" fill="${col[s.outcome]}" fill-opacity="${s.outcome === "never" ? .26 : .85}"><title>${s.kind} ${s.label}: dipped ${s.deepest_pct}%, opened ${s.open_pct}%${s.outcome !== "never" ? ", sold at −" + s.fired_drop_pct + "%" : ""}</title></circle>`;
+  });
+  $("#chart").innerHTML = g;
+  $("#tape").innerHTML = fired.length ? `<tr><th>Stretch</th><th>Sold at</th><th>From the sale to the open</th><th></th></tr>` + fired.map(s => `<tr><td>${s.kind} · ${esc(s.label)}</td><td>−${s.fired_drop_pct}%</td><td>${sign(s.after_pct)}%</td><td><span class="pill ${s.outcome}">${{ bounced: "came back", kept_falling: "kept falling", flat: "flat" }[s.outcome]}</span></td></tr>`).join("") : `<tr><td class="note">Your rule never sold in this history. NVDA rarely moves that far while the market is shut.</td></tr>`;
 }
 
-// ── step 4: approve and watch ──
-$("#approve").onclick = () => { $("#approve").classList.add("hidden"); $("#walk").classList.remove("hidden"); $("#walknote").textContent = "Approved. Talos can now check the market against this flowchart."; walkNow(); };
+$("#approve").onclick = () => { $("#approve").classList.add("hidden"); $("#walk").classList.remove("hidden"); walkNow(); };
 $("#walk").onclick = walkNow;
-
 async function walkNow() {
-  $("#walk").disabled = true; $("#walknote").textContent = "Reading Robinhood Chain and walking your graph through SERV…";
+  $("#walk").disabled = true; $("#walknote").textContent = "Reading Robinhood Chain and walking your flowchart through SERV…";
   try {
     const d = await api("/api/live", { plan: state.plan });
     $("#live").classList.remove("hidden");
-    strip(d.snapshot);
-    const path = (d.model?.path || d.truth.path);
-    const lines = [state.data.mermaid, "  classDef pass fill:#16261d,stroke:#6cc38e,color:#dff5e7", "  classDef fail fill:#2d1713,stroke:#e0715e,color:#fbd9d1", "  classDef end1 fill:#2a2216,stroke:#e3ad73,color:#f3ece2"];
-    path.forEach(p => lines.push(`  class ${p.check} ${p.passed ? "pass" : "fail"}`));
-    const dec = (d.model?.decision || d.truth.decision);
-    if (dec === "sell") lines.push("  class SELL end1"); else { const i = state.plan.checks.findIndex(c => c.id === path[path.length - 1]?.check); if (i >= 0) lines.push(`  class H${i + 1} end1`); }
-    await draw($("#graph2"), lines.join("\n"), "w");
+    state.walk = d.model ? { path: d.model.path.map((p, i) => ({ check: d.truth.path[i]?.check || p.check, passed: p.passed })) } : d.truth;
+    drawFlow($("#canvas2"), state.plan, state.walk);
+    hero(d.snapshot);
+    const dec = d.model?.decision || d.truth.decision;
     $("#verdict").textContent = dec === "sell" ? `Sell ${state.plan.action.sell_pct}%` : "Hold";
     $("#verdict").className = "verdict " + dec;
     $("#reason").textContent = d.model?.reason || d.error || "";
     const f = d.snapshot.facts;
     $("#factlist").innerHTML = [
       ["US market", f.market_closed ? `shut (${f.stretch})` : "open"], ["NVDA token", "$" + d.snapshot.price.toFixed(2)], ["Last US close", "$" + d.snapshot.last_close?.toFixed(2)],
-      ["Change since close", fmt(-f.drop_from_close_pct) + "%"], ["Normal day for NVDA", f.normal_day_pct + "%"], ["This move vs a normal day", f.move_vs_normal_day + "×"],
-      ["Price moved by selling $" + f.sale_usd, f.price_impact_pct + "%"], ["Mint & burn window", d.snapshot.mint_window_open ? "open" : "closed: thinner liquidity"],
-      ["Block", d.snapshot.block.toLocaleString()],
+      ["Since the close", sign(-f.drop_from_close_pct) + "%"], ["A normal day for NVDA", f.normal_day_pct + "%"], ["This move vs a normal day", f.move_vs_normal_day + "×"],
+      ["Price moved by the sale", f.price_impact_pct + "%"], ["New tokens can be minted", d.snapshot.mint_window_open ? "yes" : "no, weekend liquidity"], ["Robinhood Chain block", d.snapshot.block.toLocaleString()],
     ].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
-    $("#agree").innerHTML = d.model ? `<span class="agree ${d.agrees ? "yes" : "no"}">${d.agrees ? "✓ SERV's walk matches the code's exact answer" : "✕ SERV and the code disagree, so Talos would not trade"}</span><p class="note" style="margin-top:8px">Walked by ${d.model.meta.model} through SERV in ${(d.model.meta.ms / 1000).toFixed(1)}s.</p>` : "";
-    $("#walknote").textContent = "Checked " + new Date(d.snapshot.at * 1000).toLocaleTimeString() + ".";
+    $("#agree").innerHTML = d.model ? `<span class="agree ${d.agrees ? "yes" : "no"}">${d.agrees ? "✓ SERV's walk matches Talos's code" : "✕ SERV and the code disagree, so Talos won't trade"}</span><p class="note" style="margin-top:10px">Walked by ${esc(d.model.meta.model)} through SERV in ${(d.model.meta.ms / 1000).toFixed(1)}s.</p>` : "";
+    $("#walknote").textContent = "Checked at " + new Date(d.snapshot.at * 1000).toLocaleTimeString() + ".";
   } catch (e) { $("#walknote").textContent = e.message; }
   $("#walk").disabled = false;
 }

@@ -90,5 +90,6 @@ export async function snapshot({ saleNvdaWei, positionUsd = 1000, salePct = 50, 
     },
     mint_window_open: mintWindowOpen(now),
     quote: { sell_nvda: Number(size) / 1e18, usdg_out: +got.toFixed(4) },
+    candles: candles.slice(-96).map(c => [c[0], +c[4].toFixed(3)]),
   };
 }

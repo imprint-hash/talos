@@ -1,0 +1,54 @@
+{
+ "ticker": "NVDA",
+ "summary": "Sell half of NVDA if it drops at least 0.2% from the last close during a market closure, with added safeguards.",
+ "action": {
+  "type": "sell",
+  "sell_pct": 50
+ },
+ "checks": [
+  {
+   "type": "market_closed",
+   "threshold": null,
+   "label": "Market is closed",
+   "why": "Evaluate this protection during a closed US market stretch.",
+   "added_by": "talos",
+   "id": "C1"
+  },
+  {
+   "type": "drop_from_close",
+   "threshold": 0.2,
+   "label": "Drop from last close",
+   "why": "Trigger when NVDA is down at least 0.2% from the last US close.",
+   "added_by": "you",
+   "id": "C2"
+  },
+  {
+   "type": "move_vs_normal_day",
+   "threshold": 1,
+   "label": "Normal range filter",
+   "why": "This helps avoid selling on ordinary daily price wobble.",
+   "added_by": "talos",
+   "id": "C3"
+  },
+  {
+   "type": "price_impact",
+   "threshold": 1,
+   "label": "Limit price impact",
+   "why": "This added limit helps prevent a sale with more than 1% price impact.",
+   "added_by": "talos",
+   "id": "C4"
+  },
+  {
+   "type": "already_fired",
+   "threshold": null,
+   "label": "Prevent repeat sale",
+   "why": "This added check prevents another sale during the same closed stretch.",
+   "added_by": "talos",
+   "id": "C5"
+  }
+ ],
+ "assumptions": [
+  "The normal-range threshold of 1 and the 1% price-impact limit are Talos-added defaults."
+ ],
+ "unclear": []
+}

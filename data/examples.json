@@ -1,0 +1,249 @@
+[
+ {
+  "rule": "If Nvidia drops 3% while the market is closed, sell half.",
+  "plan": {
+   "ticker": "NVDA",
+   "summary": "Sell half of NVDA if it drops 3% from the last US close while the market is closed.",
+   "action": {
+    "type": "sell",
+    "sell_pct": 50
+   },
+   "checks": [
+    {
+     "type": "market_closed",
+     "threshold": null,
+     "label": "Market is closed",
+     "why": "This check applies during a closed US market stretch.",
+     "added_by": "talos",
+     "id": "C1"
+    },
+    {
+     "type": "drop_from_close",
+     "threshold": 3,
+     "label": "Three percent drop",
+     "why": "The requested trigger is a 3% drop from the last US close.",
+     "added_by": "you",
+     "id": "C2"
+    },
+    {
+     "type": "move_vs_normal_day",
+     "threshold": 1,
+     "label": "Ordinary move filter",
+     "why": "This adds protection against an ordinary daily wobble.",
+     "added_by": "talos",
+     "id": "C3"
+    },
+    {
+     "type": "price_impact",
+     "threshold": 1,
+     "label": "Price impact limit",
+     "why": "This limits sale price impact to 1%.",
+     "added_by": "talos",
+     "id": "C4"
+    },
+    {
+     "type": "already_fired",
+     "threshold": null,
+     "label": "One sale per stretch",
+     "why": "This prevents repeated sales during the same closed stretch.",
+     "added_by": "talos",
+     "id": "C5"
+    }
+   ],
+   "assumptions": [
+    "The default move_vs_normal_day threshold of 1 is added for ordinary-wobble protection."
+   ],
+   "unclear": []
+  },
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 17521,
+   "usage": {
+    "prompt_tokens": 929,
+    "completion_tokens": 564,
+    "total_tokens": 1493,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 196,
+     "audio_tokens": 0,
+     "accepted_prediction_tokens": 0,
+     "rejected_prediction_tokens": 0
+    }
+   },
+   "compiled_at": "2026-09-26T20:09:58.755Z"
+  }
+ },
+ {
+  "rule": "Sell everything if NVDA falls 5% over a weekend, but never more than $500 in one go.",
+  "plan": {
+   "ticker": "NVDA",
+   "summary": "Sell all NVDA if it falls 5% from the last US close during a weekend market closure, with each sale capped at $500.",
+   "action": {
+    "type": "sell",
+    "sell_pct": 100
+   },
+   "checks": [
+    {
+     "type": "market_closed",
+     "threshold": null,
+     "label": "Weekend market closure",
+     "why": "This check limits the rule to a closed US market stretch, consistent with the weekend condition.",
+     "added_by": "talos",
+     "id": "C1"
+    },
+    {
+     "type": "drop_from_close",
+     "threshold": 5,
+     "label": "Five percent drop",
+     "why": "This triggers when NVDA falls 5% from the last US close.",
+     "added_by": "you",
+     "id": "C2"
+    },
+    {
+     "type": "move_vs_normal_day",
+     "threshold": 1,
+     "label": "Normal day range",
+     "why": "This added check helps avoid selling on an ordinary daily price wobble.",
+     "added_by": "talos",
+     "id": "C3"
+    },
+    {
+     "type": "price_impact",
+     "threshold": 1,
+     "label": "Price impact limit",
+     "why": "This added check limits sale execution price impact to 1%.",
+     "added_by": "talos",
+     "id": "C4"
+    },
+    {
+     "type": "already_fired",
+     "threshold": null,
+     "label": "One sale per stretch",
+     "why": "This added check prevents repeat sales during the same closed stretch.",
+     "added_by": "talos",
+     "id": "C5"
+    },
+    {
+     "type": "size_cap",
+     "threshold": 500,
+     "label": "Five hundred dollar cap",
+     "why": "This limits each sale to $500, as requested.",
+     "added_by": "you",
+     "id": "C6"
+    }
+   ],
+   "assumptions": [
+    "Added a normal-day-range check with threshold 1 to help protect against ordinary daily price movement.",
+    "Added a price-impact limit with threshold 1.",
+    "A weekend means a closed US market stretch."
+   ],
+   "unclear": []
+  },
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 30939,
+   "usage": {
+    "prompt_tokens": 937,
+    "completion_tokens": 668,
+    "total_tokens": 1605,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 208,
+     "audio_tokens": 0,
+     "accepted_prediction_tokens": 0,
+     "rejected_prediction_tokens": 0
+    }
+   },
+   "compiled_at": "2026-09-26T20:10:29.708Z"
+  }
+ },
+ {
+  "rule": "Sell $20 of Nvidia on any drop at night, even a small one.",
+  "plan": {
+   "ticker": "NVDA",
+   "summary": "Sell up to $20 of NVDA for USDG during a closed-market stretch if it drops at least 5% from the last US close, with added safeguards.",
+   "action": {
+    "type": "sell",
+    "sell_pct": 100
+   },
+   "checks": [
+    {
+     "type": "market_closed",
+     "threshold": null,
+     "label": "Closed market stretch",
+     "why": "This applies the rule at night as a closed-market stretch.",
+     "added_by": "talos",
+     "id": "C1"
+    },
+    {
+     "type": "drop_from_close",
+     "threshold": 5,
+     "label": "Drop from last close",
+     "why": "This checks for a decline from the last US close.",
+     "added_by": "you",
+     "id": "C2"
+    },
+    {
+     "type": "price_impact",
+     "threshold": 1,
+     "label": "Limit price impact",
+     "why": "This added safeguard limits price impact to 1%.",
+     "added_by": "talos",
+     "id": "C3"
+    },
+    {
+     "type": "already_fired",
+     "threshold": null,
+     "label": "Prevent repeat sale",
+     "why": "This added safeguard prevents repeated sales during the same closed-market stretch.",
+     "added_by": "talos",
+     "id": "C4"
+    },
+    {
+     "type": "size_cap",
+     "threshold": 20,
+     "label": "Cap sale at $20",
+     "why": "This limits the sale to the stated dollar amount.",
+     "added_by": "you",
+     "id": "C5"
+    }
+   ],
+   "assumptions": [
+    "The unspecified drop trigger uses the 5% default.",
+    "The sale percentage is 100%, subject to the $20 cap."
+   ],
+   "unclear": [
+    "“Any drop” suggests smaller declines may count, but no numeric trigger was specified; the 5% default may not trigger on smaller drops."
+   ]
+  },
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 29320,
+   "usage": {
+    "prompt_tokens": 930,
+    "completion_tokens": 862,
+    "total_tokens": 1792,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 423,
+     "audio_tokens": 0,
+     "accepted_prediction_tokens": 0,
+     "rejected_prediction_tokens": 0
+    }
+   },
+   "compiled_at": "2026-09-26T20:10:59.028Z"
+  }
+ }
+]

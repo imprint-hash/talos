@@ -9,7 +9,8 @@
     "dev": "node bin/serve.mjs",
     "eval": "node bin/eval.mjs",
     "guard": "node bin/guard.mjs",
-    "history": "node bin/history.mjs"
+    "history": "node bin/history.mjs",
+    "examples": "node bin/examples.mjs"
   },
   "license": "MIT"
 }

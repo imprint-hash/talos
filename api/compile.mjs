@@ -1,4 +1,4 @@
-import { body, send, history } from "./_lib.mjs";
+import { body, send, history, readJson } from "./_lib.mjs";
 import { compileRule, mermaid } from "../src/serv.js";
 import { replay } from "../src/history.js";
 
@@ -11,7 +11,10 @@ export default async function handler(req, res) {
   const text = String(rule || "").trim().slice(0, 400);
   if (text.length < 8) return send(res, 400, { error: "Write your rule in a sentence." });
   try {
-    let hit = cache.get(text);
+    // The example rules on the page were compiled by SERV once and saved
+    // (bin/examples.mjs), so they open instantly and cost nothing per visit.
+    const saved = readJson("data/examples.json", []).find(e => e.rule === text);
+    let hit = saved ? { plan: saved.plan, meta: { ...saved.meta, saved: true } } : cache.get(text);
     if (!hit) { hit = await compileRule(text); cache.set(text, hit); }
     const plan = { ...hit.plan, position_usd: 1000 };
     const rows = history();
