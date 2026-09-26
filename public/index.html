@@ -109,7 +109,16 @@
   .toggle button.on { background: var(--purple); color: #fff; }
   .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink2); }
   .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--c); }
-  #chart { width: 100%; height: 360px; display: block; margin-top: 10px; }
+  #chart { width: 100%; height: 300px; display: block; margin-top: 10px; }
+  .outs { position: relative; height: 420px; margin-top: 6px; }
+  .ob { position: absolute; border-radius: 50%; transform: translate(-50%, -50%); display: grid; place-items: center; text-align: center; color: #fff; transition: all .7s cubic-bezier(.3,1.3,.5,1); padding: 10px; }
+  .ob b { display: block; font-size: 22px; font-weight: 600; line-height: 1.1; }
+  .ob span { display: block; font-size: 12px; line-height: 1.25; opacity: .95; }
+  .ob em { display: block; font-style: normal; font-size: 12px; font-weight: 600; margin-top: 4px; background: rgba(255,255,255,.22); border-radius: 999px; padding: 1px 8px; }
+  .olabel { position: absolute; transform: translateY(-50%); display: flex; gap: 10px; align-items: flex-start; background: var(--card); border-radius: 12px; padding: 10px 14px; box-shadow: var(--shadow); font-size: 13px; max-width: 240px; transition: all .7s ease; }
+  .olabel i { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: none; }
+  .olabel b { font-weight: 600; } .olabel span { color: var(--ink2); }
+  .olabel em { display: block; font-style: normal; font-weight: 600; font-size: 12px; margin-top: 2px; }
   table.tape { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
   .tape td, .tape th { padding: 11px 6px; border-bottom: 1px solid var(--line); text-align: left; font-variant-numeric: tabular-nums; }
   .tape th { color: var(--muted); font-weight: 400; font-size: 12px; }
@@ -199,12 +208,16 @@
         <div class="tile" style="background: var(--orange)"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 10h4.5a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3H15"/></svg></div><b id="t3">—</b><span>against simply holding, per $1,000</span></div>
       </div>
       <div class="card">
-        <div class="row" style="margin:0; justify-content: space-between"><b style="font-weight:600">Every night and weekend</b>
-          <div class="legend"><span style="--c: var(--purple2)"><i></i>Never sold</span><span style="--c: var(--pink)"><i></i>Sold, it came back</span><span style="--c: var(--green)"><i></i>Sold, it kept falling</span><span style="--c: var(--yellow)"><i></i>Sold, ended flat</span></div></div>
-        <svg id="chart" viewBox="0 0 760 360" preserveAspectRatio="none"></svg>
-        <div class="note">Each bubble is one closed stretch: how far NVDA dipped below the last close. Bigger bubbles are weekends.</div>
-        <table class="tape" id="tape"></table>
+        <div class="row" style="margin:0; justify-content: space-between"><b style="font-weight:600">What could happen with this rule</b><span class="note">Bubble size is how often it happened</span></div>
+        <div class="outs" id="outs"></div>
       </div>
+    </div>
+    <div class="card" style="margin-top:24px">
+      <div class="row" style="margin:0; justify-content: space-between"><b style="font-weight:600">The evidence: every night and weekend</b>
+        <div class="legend"><span style="--c: var(--purple2)"><i></i>Held</span><span style="--c: var(--pink)"><i></i>Sold, it came back</span><span style="--c: var(--green)"><i></i>Sold, it kept falling</span><span style="--c: var(--yellow)"><i></i>Sold, ended flat</span></div></div>
+      <svg id="chart" viewBox="0 0 760 300" preserveAspectRatio="none"></svg>
+      <div class="note">Each bubble is one closed stretch: how far NVDA dipped below the last close. Bigger bubbles are weekends.</div>
+      <table class="tape" id="tape"></table>
     </div>
   </section>
 
@@ -372,7 +385,7 @@ function replayView() {
   $("#t1").textContent = fired.length;
   $("#t2").textContent = `${r.bounced} of ${fired.length}`;
   $("#t3").textContent = (r.net_vs_holding_usd >= 0 ? "+$" : "−$") + Math.abs(r.net_vs_holding_usd).toFixed(2);
-  const W = 760, H = 360, pad = { l: 46, r: 16, t: 20, b: 34 };
+  const W = 760, H = 300, pad = { l: 46, r: 16, t: 20, b: 34 };
   const lo = Math.min(-5, ...r.results.map(x => x.deepest_pct));
   const y = v => pad.t + (H - pad.t - pad.b) * (v / lo);
   const x = i => pad.l + (W - pad.l - pad.r) * (i / Math.max(1, r.results.length - 1));
@@ -388,7 +401,30 @@ function replayView() {
     g += `<circle cx="${x(i)}" cy="${y(Math.min(0, s.deepest_pct))}" r="${rad}" fill="${col[s.outcome]}" fill-opacity="${s.outcome === "never" ? .26 : .85}"><title>${s.kind} ${s.label}: dipped ${s.deepest_pct}%, opened ${s.open_pct}%${s.outcome !== "never" ? ", sold at −" + s.fired_drop_pct + "%" : ""}</title></circle>`;
   });
   $("#chart").innerHTML = g;
+  outcomes(r);
   $("#tape").innerHTML = fired.length ? `<tr><th>Stretch</th><th>Sold at</th><th>From the sale to the open</th><th></th></tr>` + fired.map(s => `<tr><td>${s.kind} · ${esc(s.label)}</td><td>−${s.fired_drop_pct}%</td><td>${sign(s.after_pct)}%</td><td><span class="pill ${s.outcome}">${{ bounced: "came back", kept_falling: "kept falling", flat: "flat" }[s.outcome]}</span></td></tr>`).join("") : `<tr><td class="note">Your rule never sold in this history. NVDA rarely moves that far while the market is shut.</td></tr>`;
+}
+
+// Big bubbles, one per possible outcome, sized by how often it happened.
+function outcomes(r) {
+  const n = r.stretches || 1;
+  const money = k => r.results.filter(s => s.outcome === k).reduce((a, s) => a + (s.vs_holding_usd || 0), 0);
+  const OUT = [
+    { k: "never", name: "Holds. Nothing happens", c: "#8f7bff", x: 34, y: 50 },
+    { k: "kept_falling", name: "Sells, and it keeps falling", c: "#2fc48d", x: 72, y: 24, side: "r" },
+    { k: "bounced", name: "Sells, then it comes back", c: "#f25c78", x: 72, y: 76, side: "r" },
+    { k: "flat", name: "Sells, ends flat", c: "#f4cf2f", x: 72, y: 50, side: "r" },
+  ];
+  const box = $("#outs"), W = box.clientWidth || 700, maxR = Math.min(W * .24, 165);
+  box.innerHTML = OUT.map(o => {
+    const cnt = r[o.k] || 0, pct = cnt / n;
+    const d = cnt ? Math.max(44, 2 * maxR * Math.sqrt(pct)) : 26;
+    const m = money(o.k);
+    const mtxt = o.k === "never" || !cnt ? "" : `${m >= 0 ? "+" : "−"}$${Math.abs(m).toFixed(2)} vs holding`;
+    const bubble = `<div class="ob" style="left:${o.x}%;top:${o.y}%;width:${d}px;height:${d}px;background:${o.c};opacity:${cnt ? .9 : .25}">${d >= 150 ? `<div><b>${cnt} of ${n}</b><span>${o.name}</span></div>` : ""}</div>`;
+    const label = d >= 150 ? "" : `<div class="olabel" style="left:calc(${o.x}% + ${d / 2 + 14}px);top:${o.y}%;opacity:${cnt ? 1 : .55}"><i style="background:${o.c}"></i><div><b>${cnt} of ${n}</b> <span>${o.name}</span>${mtxt ? `<em style="color:${m >= 0 ? "#1c9e6f" : "#f25c78"}">${mtxt}</em>` : ""}</div></div>`;
+    return bubble + label;
+  }).join("");
 }
 
 $("#approve").onclick = () => { $("#approve").classList.add("hidden"); $("#walk").classList.remove("hidden"); walkNow(); };
