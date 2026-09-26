@@ -1,0 +1,386 @@
+[
+{
+"start": "Tue 21 Jul",
+"kind": "night",
+"ref": 207.481330876872,
+"worst_pct": -1.7169490571067536,
+"open_pct": 3.266102073849475,
+"hours": 17.5
+},
+{
+"start": "Wed 22 Jul",
+"kind": "night",
+"ref": 212.587452505271,
+"worst_pct": -2.0245930507447385,
+"open_pct": -0.2260072611567132,
+"hours": 17.5
+},
+{
+"start": "Thu 23 Jul",
+"kind": "night",
+"ref": 210.128531285803,
+"worst_pct": -1.9537443033479152,
+"open_pct": -1.3526017881989705,
+"hours": 17.5
+},
+{
+"start": "Fri 24 Jul",
+"kind": "weekend",
+"ref": 206.783035224249,
+"worst_pct": -0.9866940926814172,
+"open_pct": -0.38162750857400063,
+"hours": 65.5
+},
+{
+"start": "Mon 27 Jul",
+"kind": "night",
+"ref": 196.674443857815,
+"worst_pct": -2.658311121252599,
+"open_pct": -0.4843518284183723,
+"hours": 17.5
+},
+{
+"start": "Tue 28 Jul",
+"kind": "night",
+"ref": 196.359371758169,
+"worst_pct": -1.3910068395558417,
+"open_pct": -0.26574567748243183,
+"hours": 17.5
+},
+{
+"start": "Wed 29 Jul",
+"kind": "night",
+"ref": 198.307101808445,
+"worst_pct": -4.770732678280265,
+"open_pct": 1.847876359823819,
+"hours": 17.5
+},
+{
+"start": "Thu 30 Jul",
+"kind": "night",
+"ref": 195.744054023401,
+"worst_pct": -0.12390319405717332,
+"open_pct": 0.11526139160531468,
+"hours": 17.5
+},
+{
+"start": "Fri 31 Jul",
+"kind": "weekend",
+"ref": 195.262984474239,
+"worst_pct": -2.421128215239232,
+"open_pct": 2.0405624524420185,
+"hours": 65.5
+},
+{
+"start": "Mon 03 Aug",
+"kind": "night",
+"ref": 199.119100460345,
+"worst_pct": -1.5843176516952329,
+"open_pct": 1.2413398928578623,
+"hours": 17.5
+},
+{
+"start": "Tue 04 Aug",
+"kind": "night",
+"ref": 202.797510802768,
+"worst_pct": -0.6939307665697392,
+"open_pct": 3.661073970112394,
+"hours": 17.5
+},
+{
+"start": "Wed 05 Aug",
+"kind": "night",
+"ref": 220.101195673204,
+"worst_pct": -3.340211411939653,
+"open_pct": 0.7380254896996785,
+"hours": 17.5
+},
+{
+"start": "Thu 06 Aug",
+"kind": "night",
+"ref": 214.261080694022,
+"worst_pct": -0.781590219230488,
+"open_pct": 1.1343553060431333,
+"hours": 17.5
+},
+{
+"start": "Fri 07 Aug",
+"kind": "weekend",
+"ref": 223.541385636018,
+"worst_pct": -3.9972789554988064,
+"open_pct": -0.24780941540953894,
+"hours": 65.5
+},
+{
+"start": "Mon 10 Aug",
+"kind": "night",
+"ref": 212.088297756454,
+"worst_pct": -0.3126882680498322,
+"open_pct": 4.029990515396498,
+"hours": 17.5
+},
+{
+"start": "Tue 11 Aug",
+"kind": "night",
+"ref": 217.987592977885,
+"worst_pct": -2.5635274926508744,
+"open_pct": 1.492671062226525,
+"hours": 17.5
+},
+{
+"start": "Wed 12 Aug",
+"kind": "night",
+"ref": 223.761719571863,
+"worst_pct": -0.7095641127280006,
+"open_pct": 0.5705227024526804,
+"hours": 17.5
+},
+{
+"start": "Thu 13 Aug",
+"kind": "night",
+"ref": 225.332366155283,
+"worst_pct": -0.4205028510236408,
+"open_pct": 0.2506593969091586,
+"hours": 17.5
+},
+{
+"start": "Fri 14 Aug",
+"kind": "weekend",
+"ref": 225.12253636876,
+"worst_pct": -0.4052425133872939,
+"open_pct": 0.5596073362843734,
+"hours": 65.5
+},
+{
+"start": "Mon 17 Aug",
+"kind": "night",
+"ref": 225.235293475283,
+"worst_pct": -2.5297914551279166,
+"open_pct": -1.9815151250031526,
+"hours": 17.5
+},
+{
+"start": "Tue 18 Aug",
+"kind": "night",
+"ref": 219.987631985663,
+"worst_pct": -0.7177505294179043,
+"open_pct": -0.10439843889312739,
+"hours": 17.5
+},
+{
+"start": "Wed 19 Aug",
+"kind": "night",
+"ref": 218.107785959935,
+"worst_pct": -4.072267829654452,
+"open_pct": 0.5174363690401806,
+"hours": 17.5
+},
+{
+"start": "Thu 20 Aug",
+"kind": "night",
+"ref": 216.930558224124,
+"worst_pct": -1.710682266728858,
+"open_pct": -0.029135890217790728,
+"hours": 17.5
+},
+{
+"start": "Fri 21 Aug",
+"kind": "weekend",
+"ref": 214.908825528708,
+"worst_pct": -2.2456595343630092,
+"open_pct": -1.5644509459793565,
+"hours": 65.5
+},
+{
+"start": "Mon 24 Aug",
+"kind": "night",
+"ref": 208.670404114576,
+"worst_pct": -0.5705120299442812,
+"open_pct": 2.1383354214922434,
+"hours": 17.5
+},
+{
+"start": "Tue 25 Aug",
+"kind": "night",
+"ref": 213.173674182664,
+"worst_pct": -1.0105027325823412,
+"open_pct": -0.327143443126765,
+"hours": 17.5
+},
+{
+"start": "Wed 26 Aug",
+"kind": "night",
+"ref": 210.695495882294,
+"worst_pct": -2.3025647800355764,
+"open_pct": 6.6546833121833515,
+"hours": 17.5
+},
+{
+"start": "Thu 27 Aug",
+"kind": "night",
+"ref": 226.993785997857,
+"worst_pct": -1.182891687198584,
+"open_pct": 0.6435070369859242,
+"hours": 17.5
+},
+{
+"start": "Fri 28 Aug",
+"kind": "weekend",
+"ref": 218.02265132104,
+"worst_pct": -0.9632083647197365,
+"open_pct": 0.2591299771417255,
+"hours": 65.5
+},
+{
+"start": "Mon 31 Aug",
+"kind": "night",
+"ref": 220.998475130414,
+"worst_pct": -2.629472440906122,
+"open_pct": -2.605476352526004,
+"hours": 17.5
+},
+{
+"start": "Tue 01 Sep",
+"kind": "night",
+"ref": 217.467931283329,
+"worst_pct": -2.1348854977289666,
+"open_pct": 0.9631966174014961,
+"hours": 17.5
+},
+{
+"start": "Wed 02 Sep",
+"kind": "night",
+"ref": 224.816704156384,
+"worst_pct": -2.666731980440673,
+"open_pct": 1.2331002207970565,
+"hours": 17.5
+},
+{
+"start": "Thu 03 Sep",
+"kind": "night",
+"ref": 228.845523346799,
+"worst_pct": -0.47155947042609725,
+"open_pct": 1.6544053434427441,
+"hours": 17.5
+},
+{
+"start": "Fri 04 Sep",
+"kind": "weekend",
+"ref": 230.373166065422,
+"worst_pct": -0.5175935999505166,
+"open_pct": 0.9638160473670165,
+"hours": 65.5
+},
+{
+"start": "Mon 07 Sep",
+"kind": "night",
+"ref": 232.329603231358,
+"worst_pct": -1.1839514598915857,
+"open_pct": -1.079152409616646,
+"hours": 17.5
+},
+{
+"start": "Tue 08 Sep",
+"kind": "night",
+"ref": 225.973685211672,
+"worst_pct": -0.8257374830985875,
+"open_pct": -0.32906239451663266,
+"hours": 17.5
+},
+{
+"start": "Wed 09 Sep",
+"kind": "night",
+"ref": 223.853676433436,
+"worst_pct": -2.2371438243441677,
+"open_pct": -2.1443097132123,
+"hours": 17.5
+},
+{
+"start": "Thu 10 Sep",
+"kind": "night",
+"ref": 218.829618550489,
+"worst_pct": -0.6571340332744757,
+"open_pct": 0.7402196155911422,
+"hours": 17.5
+},
+{
+"start": "Fri 11 Sep",
+"kind": "weekend",
+"ref": 218.646942679339,
+"worst_pct": -4.163084364454783,
+"open_pct": -3.777860390568144,
+"hours": 65.5
+},
+{
+"start": "Mon 14 Sep",
+"kind": "night",
+"ref": 211.927481616645,
+"worst_pct": -0.9886950049358023,
+"open_pct": 0.6877767010224911,
+"hours": 17.5
+},
+{
+"start": "Tue 15 Sep",
+"kind": "night",
+"ref": 212.349182942386,
+"worst_pct": -0.46643553097481805,
+"open_pct": 0.674750547343872,
+"hours": 17.5
+},
+{
+"start": "Wed 16 Sep",
+"kind": "night",
+"ref": 214.332292232474,
+"worst_pct": -0.07517126259689588,
+"open_pct": 1.9143404097001993,
+"hours": 17.5
+},
+{
+"start": "Thu 17 Sep",
+"kind": "night",
+"ref": 219.30858015029,
+"worst_pct": -0.43933682820103126,
+"open_pct": 0.8823775877432105,
+"hours": 17.5
+},
+{
+"start": "Fri 18 Sep",
+"kind": "weekend",
+"ref": 222.05172168406,
+"worst_pct": -0.9077130037941417,
+"open_pct": 0.2866856329219347,
+"hours": 65.5
+},
+{
+"start": "Mon 21 Sep",
+"kind": "night",
+"ref": 227.73537324384,
+"worst_pct": -1.2285864042742234,
+"open_pct": 0.5717132528620938,
+"hours": 17.5
+},
+{
+"start": "Tue 22 Sep",
+"kind": "night",
+"ref": 228.76840419713,
+"worst_pct": -0.7629294280481314,
+"open_pct": -0.10111874890672556,
+"hours": 17.5
+},
+{
+"start": "Wed 23 Sep",
+"kind": "night",
+"ref": 225.914079906172,
+"worst_pct": -2.0480852842782893,
+"open_pct": -1.3454350549144123,
+"hours": 17.5
+},
+{
+"start": "Thu 24 Sep",
+"kind": "night",
+"ref": 224.680598993936,
+"worst_pct": -0.5488332633345361,
+"open_pct": 0.4927015820306302,
+"hours": 17.5
+}
+]

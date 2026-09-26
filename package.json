@@ -1,0 +1,15 @@
+{
+  "name": "talos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Keeps watch over your stock tokens while the US market sleeps. SERV Reasoning compiles your rule into a flowchart you approve; Talos sells on Robinhood Chain only when your rule and the market agree.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node bin/serve.mjs",
+    "eval": "node bin/eval.mjs",
+    "guard": "node bin/guard.mjs",
+    "history": "node bin/history.mjs"
+  },
+  "license": "MIT"
+}

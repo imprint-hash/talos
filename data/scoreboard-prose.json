@@ -1,0 +1,111 @@
+{
+ "generated_at": "2026-09-26T18:54:08.624Z",
+ "cases": 40,
+ "graph": "sell half on a 3% drop, with Talos's checks",
+ "given_as": "a paragraph of plain English",
+ "note": "40 moments: 32 real closed-market moments from the NVDA/USDG pool plus 8 awkward edge cases. \"Exactly right\" means the same decision and the same yes/no at every check as the code. Cost uses SERV's published per-token prices; direct calls are billed at the provider's own tier, which may be lower.",
+ "rows": [
+  {
+   "label": "Small model, called directly",
+   "model": "gpt-6-luna",
+   "through_serv": false,
+   "correct": 39,
+   "total": 40,
+   "errors": 0,
+   "ms": 2199,
+   "cost_per_1000": 0.124,
+   "misses": [
+    {
+     "case": "night Tue 4 Aug, midway",
+     "model": "sell",
+     "truth": "hold"
+    }
+   ]
+  },
+  {
+   "label": "Small model, through SERV",
+   "model": "gpt-6-luna",
+   "through_serv": true,
+   "correct": 32,
+   "total": 40,
+   "errors": 0,
+   "ms": 4631,
+   "cost_per_1000": 0.346,
+   "misses": [
+    {
+     "case": "night Tue 4 Aug, midway",
+     "model": "sell",
+     "truth": "hold"
+    },
+    {
+     "case": "night Wed 2 Sept, midway",
+     "model": "hold",
+     "truth": "hold"
+    },
+    {
+     "case": "night Wed 9 Sept, deepest",
+     "model": "hold",
+     "truth": "hold"
+    },
+    {
+     "case": "night Wed 23 Sept, midway",
+     "model": "hold",
+     "truth": "hold"
+    },
+    {
+     "case": "exactly on the trigger",
+     "model": "sell",
+     "truth": "sell"
+    },
+    {
+     "case": "already sold this stretch",
+     "model": "hold",
+     "truth": "hold"
+    },
+    {
+     "case": "big drop, thin book",
+     "model": "hold",
+     "truth": "hold"
+    },
+    {
+     "case": "sale over the cap",
+     "model": "hold",
+     "truth": "hold"
+    }
+   ]
+  },
+  {
+   "label": "Frontier model, called directly",
+   "model": "gpt-5.5",
+   "through_serv": false,
+   "correct": 35,
+   "total": 40,
+   "errors": 4,
+   "ms": 2578,
+   "cost_per_1000": 8.999,
+   "misses": [
+    {
+     "case": "night Tue 4 Aug, midway",
+     "model": "sell",
+     "truth": "hold"
+    },
+    {
+     "case": "no normal day on record",
+     "error": "SERV: Insufficient credits"
+    },
+    {
+     "case": "big drop, thin book",
+     "error": "SERV: Insufficient credits"
+    },
+    {
+     "case": "sale over the cap",
+     "error": "SERV: Insufficient credits"
+    },
+    {
+     "case": "drop just under a normal day",
+     "error": "SERV: Insufficient credits"
+    }
+   ]
+  }
+ ]
+}

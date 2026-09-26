@@ -1,0 +1,70 @@
+{
+ "generated_at": "2026-09-26T18:46:38.113Z",
+ "cases": 40,
+ "graph": "sell half on a 3% drop, with Talos's checks",
+ "note": "40 moments: 32 real closed-market moments from the NVDA/USDG pool plus 8 awkward edge cases, walked as the approved flowchart. Right means the same sell/hold decision and the same yes/no at every step as Talos's code. Cost uses SERV's published per-token prices.",
+ "rows": [
+  {
+   "label": "Small model, called directly",
+   "model": "gpt-6-luna",
+   "through_serv": false,
+   "correct": 40,
+   "total": 40,
+   "errors": 0,
+   "ms": 2212,
+   "cost_per_1000": 0.179,
+   "misses": []
+  },
+  {
+   "label": "Small model, through SERV",
+   "model": "gpt-6-luna",
+   "through_serv": true,
+   "correct": 40,
+   "total": 40,
+   "errors": 0,
+   "ms": 2108,
+   "cost_per_1000": 0.207,
+   "misses": []
+  },
+  {
+   "label": "Frontier model, called directly",
+   "model": "gpt-5.5",
+   "through_serv": false,
+   "correct": 40,
+   "total": 40,
+   "errors": 0,
+   "ms": 2222,
+   "cost_per_1000": 9.051,
+   "misses": []
+  }
+ ],
+ "finding": "Once the rule is a flowchart, the small model decides exactly as well as a frontier model at about 2% of the cost. That is the reason Talos compiles every rule into a graph, SERV's method.",
+ "trap": "One real night fooled every model. On Tue 4 Aug NVDA rose 7.2% after the close; given the rule as a paragraph, the small model with and without SERV and the frontier model all read it as a 7% drop and said sell. Talos's code said hold, and Talos only trades when the model and the code agree, so it would not have sold into a rally.",
+ "prose": {
+  "given_as": "a paragraph of plain English",
+  "rows": [
+   {
+    "label": "Small model, called directly",
+    "correct": 39,
+    "total": 40,
+    "errors": 0,
+    "cost_per_1000": 0.124
+   },
+   {
+    "label": "Small model, through SERV",
+    "correct": 32,
+    "total": 40,
+    "errors": 0,
+    "cost_per_1000": 0.346
+   },
+   {
+    "label": "Frontier model, called directly",
+    "correct": 35,
+    "total": 40,
+    "errors": 4,
+    "cost_per_1000": 8.999
+   }
+  ],
+  "note": "With the rule as a paragraph, SERV redacted the check names in its answer and reported its steps differently, so it scores lower on exact steps; its sell/hold decisions were right in 39 of 40. The frontier run stopped after 36 cases when the SERV credit ran out."
+ }
+}
