@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talos — every night and weekend, as a bubble map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<style>
+  :root { --bg: #dfe1f7; --card: #fff; --ink: #2b2d5c; --ink2: #55588a; --muted: #9597bd; --line: #eceefa;
+    --purple: #6c5cf5; --pink: #f25c78; --green: #2fc48d; --yellow: #f4cf2f; --orange: #fb8b5a;
+    --shadow: 0 18px 50px rgba(92, 86, 196, .14), 0 2px 6px rgba(92, 86, 196, .06); }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: Poppins, system-ui, sans-serif; font-size: 14px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1 { font-size: 26px; font-weight: 600; }
+  p.sub { color: var(--ink2); margin-top: 6px; max-width: 70ch; }
+  .bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin: 20px 0 16px; }
+  .toggle { display: inline-flex; background: var(--card); border-radius: 12px; padding: 4px; box-shadow: var(--shadow); }
+  .toggle button { background: none; border: 0; border-radius: 9px; padding: 9px 16px; font: inherit; font-size: 13px; color: var(--ink2); cursor: pointer; }
+  .toggle button.on { background: var(--purple); color: #fff; }
+  .stat { background: var(--card); border-radius: 12px; padding: 9px 14px; box-shadow: var(--shadow); font-size: 13px; color: var(--ink2); }
+  .stat b { color: var(--ink); font-weight: 600; }
+  .stage { position: relative; background: #f3f4fd; border-radius: 20px; box-shadow: var(--shadow); overflow: hidden; height: 620px;
+    background-image: radial-gradient(circle at 1px 1px, #d9dbf3 1.5px, transparent 1.6px); background-size: 14px 14px; }
+  svg { width: 100%; height: 100%; display: block; }
+  .hub text { font-family: Poppins; font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .hub .sub { font-size: 11px; font-weight: 400; fill: var(--ink2); }
+  .card { position: absolute; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding: 12px 14px; font-size: 13px; pointer-events: none; opacity: 0; transition: opacity .15s; max-width: 260px; }
+  .card b { display: block; font-weight: 600; }
+  .card span { color: var(--ink2); display: block; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink2); margin-top: 14px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Every night and weekend, as a bubble map</h1>
+  <p class="sub">Each bubble is one real closed stretch of the NVDA/USDG pool on Robinhood Chain since 21 July, sized by how far NVDA dipped. Lines connect each one to what decided it. Switch views and watch bubbles move between clusters.</p>
+  <div class="bar">
+    <div class="toggle"><button class="on" data-v="talos">With Talos's checks</button><button data-v="rule">Your rule alone</button></div>
+    <span class="stat" id="s1"></span><span class="stat" id="s2"></span>
+  </div>
+  <div class="stage" id="stage"><svg id="svg"></svg><div class="card" id="tip"></div></div>
+  <div class="legend">
+    <span><i style="background:#b3a8ff"></i>Held: the drop never reached your trigger</span>
+    <span><i style="background:var(--orange)"></i>Held by Talos: big enough for your rule, normal for NVDA</span>
+    <span><i style="background:var(--green)"></i>Sold, and it kept falling</span>
+    <span><i style="background:var(--pink)"></i>Sold, then it came back</span>
+    <span><i style="background:var(--yellow)"></i>Sold, ended flat</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+const RULE = "If Nvidia drops 3% while the market is closed, sell half.";
+const stage = document.getElementById("stage"), svg = d3.select("#svg"), tip = document.getElementById("tip");
+let data, view = "talos", sim, W, H;
+
+const HUBS = {
+  small:   { label: "Never reached −3%", sub: "held", color: "#b3a8ff", fx: .30, fy: .50 },
+  talos:   { label: "Held by Talos", sub: "a normal move for NVDA", color: "#fb8b5a", fx: .63, fy: .22 },
+  falling: { label: "Sold, kept falling", sub: "selling helped", color: "#2fc48d", fx: .82, fy: .42 },
+  back:    { label: "Sold, came back", sub: "selling hurt", color: "#f25c78", fx: .70, fy: .76 },
+  flat:    { label: "Sold, ended flat", sub: "", color: "#f4cf2f", fx: .88, fy: .72 },
+};
+
+// Which hub a stretch belongs to in the current view.
+function hubOf(s, trig) {
+  const r = view === "talos" ? s.talos : s.rule;
+  if (r.outcome === "kept_falling") return "falling";
+  if (r.outcome === "bounced") return "back";
+  if (r.outcome === "flat") return "flat";
+  return Math.abs(s.deepest_pct) >= trig && view === "talos" ? "talos" : "small";
+}
+
+async function load() {
+  const r = await fetch("/api/compile", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ rule: RULE }) });
+  data = await r.json();
+  const trig = data.plan.checks.find(c => c.type === "drop_from_close")?.threshold || 3;
+  const rule = data.replay_rule_only.results;
+  data.nodes = data.replay.results.map((s, i) => ({ ...s, talos: s, rule: rule[i], trig, id: i }));
+  draw();
+}
+
+function stats() {
+  const r = view === "talos" ? data.replay : data.replay_rule_only;
+  const fired = r.results.filter(x => x.outcome !== "never").length;
+  document.getElementById("s1").innerHTML = `Sold <b>${fired}</b> of ${r.stretches} times`;
+  const m = r.net_vs_holding_usd;
+  document.getElementById("s2").innerHTML = `Against holding: <b style="color:${m >= 0 ? "#1c9e6f" : "#f25c78"}">${m >= 0 ? "+" : "−"}$${Math.abs(m).toFixed(2)}</b> per $1,000`;
+}
+
+function draw() {
+  W = stage.clientWidth; H = stage.clientHeight;
+  svg.attr("viewBox", `0 0 ${W} ${H}`);
+  const hubs = Object.entries(HUBS).map(([k, h]) => ({ k, ...h, x: h.fx * W, y: h.fy * H }));
+  const hubPos = Object.fromEntries(hubs.map(h => [h.k, h]));
+  const rad = d => 6 + Math.min(26, Math.abs(Math.min(0, d.deepest_pct)) * 5.5) + (d.kind === "weekend" ? 5 : 0);
+
+  svg.selectAll("*").remove();
+  const gLinks = svg.append("g"), gNodes = svg.append("g"), gHubs = svg.append("g");
+
+  const link = gLinks.selectAll("line").data(data.nodes).join("line").attr("stroke-width", 1.1).attr("stroke-opacity", .45);
+  const node = gNodes.selectAll("circle").data(data.nodes).join("circle")
+    .attr("r", rad).attr("stroke", "#fff").attr("stroke-width", 1.5).style("cursor", "pointer")
+    .on("mousemove", (e, d) => {
+      const r = view === "talos" ? d.talos : d.rule, b = stage.getBoundingClientRect();
+      tip.innerHTML = `<b>${d.kind === "weekend" ? "Weekend" : "Night"} · ${d.label}</b><span>Deepest dip ${d.deepest_pct}% · opened ${d.open_pct > 0 ? "+" : ""}${d.open_pct}%</span>` +
+        (r.outcome !== "never" ? `<span>Sold at −${r.fired_drop_pct}%, then ${r.after_pct > 0 ? "+" : ""}${r.after_pct}% by the open (${r.vs_holding_usd >= 0 ? "+" : "−"}$${Math.abs(r.vs_holding_usd).toFixed(2)})</span>` : `<span>Held</span>`);
+      tip.style.left = Math.min(W - 270, e.clientX - b.left + 14) + "px"; tip.style.top = (e.clientY - b.top + 14) + "px"; tip.style.opacity = 1;
+    })
+    .on("mouseleave", () => tip.style.opacity = 0);
+
+  const hub = gHubs.selectAll("g").data(hubs).join("g").attr("class", "hub").attr("transform", h => `translate(${h.x},${h.y})`);
+  hub.append("circle").attr("r", 7).attr("fill", h => h.color).attr("stroke", "#fff").attr("stroke-width", 3);
+  hub.append("text").attr("y", -16).attr("text-anchor", "middle").text(h => h.label);
+  hub.append("text").attr("class", "sub").attr("y", -2 - 16 + 30).attr("dy", 14).attr("text-anchor", "middle").text(h => h.sub);
+
+  function place() {
+    data.nodes.forEach(d => { d.hub = hubOf(d, d.trig); });
+    node.transition().duration(500).attr("fill", d => HUBS[d.hub].color);
+    link.attr("stroke", d => HUBS[d.hub].color);
+    hub.style("opacity", h => data.nodes.some(d => d.hub === h.k) ? 1 : .25);
+    stats();
+  }
+  place();
+  // Start each bubble near its cluster so the map opens settled, not flying in.
+  data.nodes.forEach(d => { const h = hubPos[d.hub]; d.x = h.x + (Math.random() - .5) * 80; d.y = h.y + (Math.random() - .5) * 80; });
+
+  sim = d3.forceSimulation(data.nodes)
+    .force("x", d3.forceX(d => hubPos[d.hub].x).strength(.09))
+    .force("y", d3.forceY(d => hubPos[d.hub].y).strength(.09))
+    .force("collide", d3.forceCollide(d => rad(d) + 2).strength(.9))
+    .force("charge", d3.forceManyBody().strength(-6))
+    .on("tick", () => {
+      node.attr("cx", d => d.x).attr("cy", d => d.y);
+      link.attr("x1", d => d.x).attr("y1", d => d.y).attr("x2", d => hubPos[d.hub].x).attr("y2", d => hubPos[d.hub].y);
+    });
+  sim.tick(160);
+
+  document.querySelectorAll(".toggle button").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".toggle button").forEach(x => x.classList.toggle("on", x === b));
+    view = b.dataset.v; place();
+    sim.force("x").x(d => hubPos[d.hub].x); sim.force("y").y(d => hubPos[d.hub].y);
+    sim.alpha(.9).restart();
+  });
+}
+load();
+</script>
+</body>
+</html>

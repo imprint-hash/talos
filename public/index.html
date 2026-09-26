@@ -153,7 +153,7 @@
 <nav class="top"><div class="wrap">
   <div class="logo"><span class="m"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>Talos</div>
   <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9597bd" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Robinhood Chain · NVDA / USDG</span></div>
-  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a></div>
+  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a><a href="#usage">Usage</a></div>
 </div></nav>
 
 <main class="wrap">
@@ -241,6 +241,22 @@
   <section id="score">
     <div class="sh"><span class="n">6</span><h2>Does it hold up?</h2><p>The same flowchart walked over 40 real and awkward moments, scored against Talos's code.</p></div>
     <div class="card" id="sboard"><span class="note">Loading…</span></div>
+  </section>
+  <section id="usage">
+    <div class="sh"><span class="n">7</span><h2>Every watch runs on SERV</h2><p>Talos checks every 15 minutes whenever the US market is shut. Each check is one SERV Reasoning call on the cheapest model, which only works because the rule is a flowchart.</p></div>
+    <div class="rgrid">
+      <div class="tiles">
+        <div class="tile" style="background: var(--purple)"><b id="u1">542</b><span>SERV calls a week for one person watching NVDA</span></div>
+        <div class="tile" style="background: var(--cyan)"><b id="u2">$0.49</b><span>SERV spend per person per month, small model through SERV</span></div>
+        <div class="tile" style="background: var(--orange)"><b id="u3">$21.25</b><span>the same checks on a frontier model, per person per month</span></div>
+      </div>
+      <div class="card">
+        <b style="font-weight:600">At scale</b>
+        <div class="row" style="margin-top:14px"><input type="range" id="users" min="100" max="100000" step="100" value="10000" style="flex:1; accent-color: var(--purple)"><span class="stat" id="ucount" style="background:var(--soft); border-radius:10px; padding:8px 12px; font-weight:600"></span></div>
+        <dl class="facts" id="scale" style="margin-top:14px"></dl>
+        <p class="note" style="margin-top:12px">Measured costs from the scoreboard: $0.21 per 1,000 checks through SERV, $9.05 on a frontier model. OpenServ puts 25% of SERV Reasoning revenue into buying and burning $SERV. Talos's own pricing is a separate question: a flat monthly fee per ticker watched, with the option to pay in $SERV.</p>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -452,6 +468,19 @@ async function walkNow() {
   } catch (e) { $("#walknote").textContent = e.message; }
   $("#walk").disabled = false;
 }
+// ── SERV usage at scale ──
+(() => {
+  const PER_WEEK = 542, SERV_PER_1K = 0.207, FRONTIER_PER_1K = 9.051, month = PER_WEEK * 52 / 12;
+  const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? Math.round(n / 1e3).toLocaleString() + "k" : Math.round(n).toLocaleString();
+  const usd = n => "$" + (n >= 1000 ? Math.round(n).toLocaleString() : n.toFixed(2));
+  const r = document.getElementById("users");
+  const show = () => {
+    const u = +r.value, calls = u * month, serv = calls * SERV_PER_1K / 1000, fr = calls * FRONTIER_PER_1K / 1000;
+    document.getElementById("ucount").textContent = u.toLocaleString() + " people";
+    document.getElementById("scale").innerHTML = [["SERV calls a month", fmt(calls)], ["SERV Reasoning spend a month", usd(serv)], ["Of that, into $SERV buy-and-burn (25%)", usd(serv * .25)], ["Same checks on a frontier model", usd(fr)]].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  };
+  r.oninput = show; show();
+})();
 </script>
 </body>
 </html>

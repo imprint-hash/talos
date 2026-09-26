@@ -71,12 +71,20 @@ We walked the same graph over 40 moments: 32 real closed-market moments from the
 
 Real sales appear on the page and in [`data/receipts.json`](data/receipts.json), each with its Robinhood Chain transaction.
 
-## Revenue
+## Revenue, for Talos and for SERV
 
-People already pay for stop-losses. Stock tokens trading while the market is shut have none. Talos sells the missing stop:
-- **Watch fee:** a flat monthly fee per ticker watched, or a few basis points of the value protected.
-- **Execution fee:** on sales Talos actually makes, never on holds.
-- Every compile and every check is a SERV Reasoning call, and it runs on the cheapest model because the rule is a graph.
+**For Talos:** people already pay for stop-losses, and stock tokens trading while the market is shut have none. Talos sells the missing stop: a flat monthly fee per ticker watched, an execution fee only on sales it actually makes, and the option to pay in $SERV.
+
+**For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 SERV calls a week** for one person watching NVDA. Because the rule is a flowchart, those run on the cheapest model:
+
+| | Per person per month | 10,000 people per month |
+|---|---|---|
+| SERV calls | 2,349 | 23.5 million |
+| Small model through SERV ($0.21 per 1,000 checks, measured) | **$0.49** | **$4,862** |
+| Of which into $SERV buy-and-burn (OpenServ puts 25% of Reasoning revenue there) | $0.12 | $1,215 |
+| The same checks on a frontier model ($9.05 per 1,000, measured) | $21.25 | $212,578 |
+
+That's SERV's own argument, bounded reasoning making a small model good enough to run at volume, turned into steady, recurring API demand that a normal person pays for. The page has a slider for this under **Usage**.
 
 ## How it works
 
