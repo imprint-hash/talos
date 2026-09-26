@@ -1,6 +1,6 @@
 {
  "ticker": "NVDA",
- "summary": "Sell half of NVDA if it drops at least 0.2% from the last close during a market closure, with added safeguards.",
+ "summary": "While the US market is closed, sell 50% of the NVDA position for USDG if it falls at least 0.2% from the last US close.",
  "action": {
   "type": "sell",
   "sell_pct": 50
@@ -9,8 +9,8 @@
   {
    "type": "market_closed",
    "threshold": null,
-   "label": "Market is closed",
-   "why": "Evaluate this protection during a closed US market stretch.",
+   "label": "US market closed",
+   "why": "This check limits the rule to periods when the US market is closed.",
    "added_by": "talos",
    "id": "C1"
   },
@@ -23,32 +23,25 @@
    "id": "C2"
   },
   {
-   "type": "move_vs_normal_day",
-   "threshold": 1,
-   "label": "Normal range filter",
-   "why": "This helps avoid selling on ordinary daily price wobble.",
-   "added_by": "talos",
-   "id": "C3"
-  },
-  {
    "type": "price_impact",
    "threshold": 1,
    "label": "Limit price impact",
-   "why": "This added limit helps prevent a sale with more than 1% price impact.",
+   "why": "This Talos-added check limits the expected price impact to 1%.",
    "added_by": "talos",
-   "id": "C4"
+   "id": "C3"
   },
   {
    "type": "already_fired",
    "threshold": null,
    "label": "Prevent repeat sale",
-   "why": "This added check prevents another sale during the same closed stretch.",
+   "why": "This Talos-added check prevents another sale during the same closed stretch.",
    "added_by": "talos",
-   "id": "C5"
+   "id": "C4"
   }
  ],
  "assumptions": [
-  "The normal-range threshold of 1 and the 1% price-impact limit are Talos-added defaults."
+  "“Sell half” is represented as a 50% sale.",
+  "The 1% price-impact limit is a Talos-added default."
  ],
  "unclear": []
 }

@@ -1,0 +1,22 @@
+[
+ {
+  "when": "Sat, 26 Sep 2026 21:44:50 GMT",
+  "what": "Sold 0.013635 NVDA for about $3.06 USDG",
+  "why": "The market is closed, the drop is at least 0.2%, the sale’s price impact is within 1%, and no sale has already been made this stretch, so sell 50% of the NVDA tokens.",
+  "rule": "While the US market is closed, sell 50% of the NVDA position for USDG if it falls at least 0.2% from the last US close.",
+  "facts": {
+   "market_closed": true,
+   "stretch": "weekend",
+   "drop_from_close_pct": 0.34,
+   "normal_day_pct": 2.16,
+   "move_vs_normal_day": 0.16,
+   "price_impact_pct": 0.05,
+   "already_fired": false,
+   "position_usd": 6.1,
+   "sale_usd": 3.05
+  },
+  "hash": "0x3ca96c692d2b80422de0d32a5a3517e18ae3175159d58253492d1be7609e6150",
+  "link": "https://robinhoodchain.blockscout.com/tx/0x3ca96c692d2b80422de0d32a5a3517e18ae3175159d58253492d1be7609e6150",
+  "approve_hash": "0x873693e16a0d75016fcb53c6f6011b429d3574387c60a15e925390f489390f0f"
+ }
+]
