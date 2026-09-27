@@ -69,7 +69,7 @@ We walked the same graph over 40 moments: 32 real closed-market moments from the
 
 ## Awake right now
 
-Talos isn't only a demo. A watch checks the live market every 15 minutes, on the quarter hour, whenever the US market is shut: it reads the chain, has SERV read the news, walks the approved 3% rule through SERV, and evaluates it in code. Every decision is published to the [`watch` branch](https://github.com/imprint-hash/talos/blob/watch/watch-log.json) and shown on the page under **Awake right now**. The watch runs from the owner's machine (`bin/watch-loop.sh`) and has no wallet key, so it can't sell.
+Talos isn't only a demo. A watch checks the live market every 15 minutes, on the quarter hour, whenever the US market is shut: it reads the chain, has SERV read the news, walks the approved 3% rule through SERV, and evaluates it in code. Every decision is published to the [`watch` branch](https://github.com/imprint-hash/talos/blob/watch/watch-log.json) and shown on the page under **Awake right now**. The watch runs as a scheduled GitHub Action ([`watch.yml`](.github/workflows/watch.yml)) with its own SERV key and no wallet key, so it can't sell.
 
 ## Safety
 
@@ -116,7 +116,7 @@ That's SERV's own argument, bounded reasoning making a small model good enough t
 | `api/` | `compile`, `live`, `status` for the website |
 | `bin/guard.mjs` | One watch cycle from the owner's machine |
 | `bin/eval.mjs` | The scoreboard |
-| `bin/watch.mjs`, `bin/watch-loop.sh` | The public watch, every 15 minutes |
+| `bin/watch.mjs`, `.github/workflows/watch.yml` | The public watch, every 15 minutes |
 | `data/nvda_15m.json` | Every 15-minute price of the NVDA/USDG pool since it opened (GeckoTerminal) |
 
 Pool: Uniswap v3 NVDA/USDG 0.05% on Robinhood Chain, [`0xd4eb…14a3`](https://robinhoodchain.blockscout.com/address/0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3), about $5.7M of liquidity.

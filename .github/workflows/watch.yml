@@ -1,0 +1,29 @@
+# Talos's public watch: every 15 minutes, check the approved 3% rule against the
+# live market (SERV reads the news and walks the flowchart, code checks it) and
+# append the result to watch-log.json on the `watch` branch, which the site reads.
+# It has no wallet key, so it can never sell.
+name: watch
+on:
+  schedule: [{ cron: "*/15 * * * *" }]
+  workflow_dispatch:
+permissions: { contents: write }
+concurrency: { group: watch, cancel-in-progress: false }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Fetch the log
+        run: git fetch origin watch --depth=1 && git show origin/watch:watch-log.json > /tmp/watch-log.json || true
+      - name: Check
+        env: { SERV_API_KEY: "${{ secrets.SERV_API_KEY }}" }
+        run: node bin/watch.mjs --log /tmp/watch-log.json
+      - name: Save the log
+        run: |
+          git config user.name "talos-watch"; git config user.email "talos-watch@users.noreply.github.com"
+          git checkout -q --orphan watch-new && git rm -rfq . && cp /tmp/watch-log.json watch-log.json
+          git add watch-log.json && git commit -qm "watch $(date -u +%FT%TZ)"
+          git push -fq origin watch-new:watch
