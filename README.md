@@ -88,16 +88,16 @@ Every sale is also in [`data/receipts.json`](data/receipts.json).
 
 ## Revenue, for Talos and for SERV
 
-**Pricing: Talos only earns extra when it saves you money.**
+**Revenue potential: hold $SERV to run Talos.**
 
-| | What you pay |
+Talos is unlocked by holding $SERV, OpenServ's token, not by a subscription. Connect a wallet and Talos reads its $SERV balance on Base (read only: no transaction, no bridge, and the same address works on both chains). All selling still happens on Robinhood Chain.
+
+| Hold in $SERV | What Talos does for you |
 |---|---|
-| Watching one stock | **$2 a month**, paid from your wallet in USDG on Robinhood Chain |
-| When Talos sells and the price keeps falling to the open | **10% of the money it saved you**, measured by code from the sale price and the pool's price at the open. Sold $500 at 2 AM, worth $470 at the open: Talos saved you $30 and keeps $3 |
-| When Talos sells and the price comes back, or it holds | **Nothing extra** |
-| AI agents (coming next) | Talos as an MCP tool, **paid per check with x402** |
+| About $50 | Watches 1 stock, checking every 15 minutes while the market is shut |
+| About $200 | Watches up to 5 stocks, checking every 5 minutes |
 
-The walk costs about $0.49 a person a month through SERV (measured, below), and the news check roughly doubles that, to about $1: the $2 plan covers its own reasoning, and the success fee is only earned on nights Talos was right.
+The balance is re-checked every month, so access lasts only while the $SERV is held. That gives people a reason to buy and hold $SERV to use a product, never a promise about its price. Later, part of the value Talos creates can buy $SERV too: when Talos sells and the price keeps falling to the open, a share of what it saved you buys $SERV (that needs a bridge from Robinhood Chain to Base, so it comes after the holding tiers).
 
 **For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 checks a week** for one person watching NVDA, each one a news judgement and a walk through SERV. Because the rule is a flowchart, those run on the cheapest model:
 
