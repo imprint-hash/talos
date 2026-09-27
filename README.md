@@ -30,9 +30,10 @@ Most closed-market dips come back by the morning. A dumb stop-loss sells you at 
    - *Is there real bad news behind the drop?* A dip with no news usually comes back; a drop with real bad news often doesn't.
    - *Have I already sold during this closed stretch?*
 3. **Talos replays your flowchart on every real night and weekend** before you approve it, and shows what it would have done: never fired, fired and it bounced back, fired and it kept falling, and what that did to your money against simply holding.
-4. **SERV reads the news.** When the market is shut, Talos pulls the Nvidia headlines published since the close. SERV's **Prompt Guard** screens them first (headlines are text written by strangers), then SERV judges whether real bad news explains the drop and cites the headlines that show it. Talos's code checks every citation: it must be a headline Talos actually fetched, published after the close, and about Nvidia. If it isn't, there's no sale.
-5. **You approve the flowchart, not each trade.** From then on, on every check, a small, cheap model walks your approved graph through SERV, and Talos's code evaluates the same graph exactly. **A sale needs both to agree.** The path that decided it lights up.
-6. **Talos sells on Robinhood Chain** (NVDA → USDG on Uniswap) from one small wallet, with a per-sale cap, after a dry run.
+4. **SERV reviews your rule against its own replay.** It says in plain words what the rule got wrong or right on the real nights and suggests a better rule you can try in one click. Code checks that every number SERV writes is one the replay actually produced.
+5. **SERV reads the news.** When the market is shut, Talos pulls the Nvidia headlines published since the close. SERV's **Prompt Guard** screens them first (headlines are text written by strangers), then SERV judges whether real bad news explains the drop and cites the headlines that show it. Talos's code checks every citation: it must be a headline Talos actually fetched, published after the close, and about Nvidia. If it isn't, there's no sale.
+6. **You approve the flowchart, not each trade.** From then on, on every check, a small, cheap model walks your approved graph through SERV, and Talos's code evaluates the same graph exactly. **A sale needs both to agree.** The path that decided it lights up, each step shows its live value, and a bar shows how close the rule is to selling right now.
+7. **Talos sells on Robinhood Chain** (NVDA → USDG on Uniswap) from one small wallet, with a per-sale cap, after a dry run.
 
 ## Why SERV is the core, not a logo
 
@@ -41,6 +42,7 @@ SERV's research, [BRAID](https://arxiv.org/abs/2512.15959), argues that models g
 | Step | What SERV does |
 |---|---|
 | Compile | Turns the person's sentence into a typed plan (strict JSON schema) that becomes the flowchart. The **Shadow Agent** validates that every number came from the person's words: *"$20 of Nvidia"* becomes a $20 cap, never 20%. |
+| Review | SERV reads the replay of the person's rule and of the same rule with Talos's checks, explains what happened on those nights in plain words, and suggests a better rule. Code rejects a review that uses any number the replay didn't produce. |
 | News | The one judgement code can't make: is there real bad news behind this drop? SERV reads the headlines since the close, behind **Prompt Guard**, and cites its evidence; code verifies every citation before it can count. We tested it with a fake headline that ordered it to say "sell" (ignored), a real-sounding export ban (flagged, cited correctly) and a made-up citation (rejected by code). |
 | Walk | On every check, `gpt-6-luna` through SERV walks the approved graph and explains the decision in one plain sentence. |
 | Guard | Arithmetic, prices and dates never go through a model, following SERV's own guidance. Code measures, SERV reasons, and code checks the conclusion before money moves. |
@@ -103,6 +105,7 @@ That's SERV's own argument, bounded reasoning making a small model good enough t
 |---|---|
 | `src/serv.js` | SERV calls: compile a rule into a plan, draw the flowchart, walk it (flowchart or paragraph) |
 | `src/news.js` | Headlines since the close, SERV's judgement behind Prompt Guard, and code's check of every citation |
+| `src/review.js` | SERV's review of a rule against its replay, with every number checked |
 | `src/check.js` | One live check, the same for the website, the watch and the guard |
 | `src/history.js` | Closed-market stretches, what a normal day is, the exact evaluation of a plan, and the replay |
 | `src/market.js` | Live reads from Robinhood Chain: pool price, Uniswap quote for the sale size, last close |

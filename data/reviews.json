@@ -1,0 +1,35 @@
+{
+ "If Nvidia drops 3% while the market is closed, sell half.": {
+  "headline": "The 3% rule sold too early three times in the replay.",
+  "advice": "Across 48 closed stretches, it sold four times; three were followed by a rebound, and it underperformed holding by $69.97 per $1,000. Talos’s checks reduced that to one sale and a $2.20 gain versus holding, though the news check could not be replayed. Keep the 3% trigger, but require stronger confirmation before selling.",
+  "suggested_rule": "If NVDA falls 3% while the market is closed, sell half only when an unusually large move is confirmed by significant bad news.",
+  "verified": true,
+  "unconfirmed": [],
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 8024
+  }
+ },
+ "Sell everything if NVDA falls 5% over a weekend, but never more than $500 in one go.": {
+  "headline": "Neither rule triggered in any of the 48 replayed periods.",
+  "advice": "Both versions recorded zero sales and a $0.00 difference per $1,000 held, so the added checks made no difference in this replay. The news check could not be replayed; make the $500 cap’s meaning clear alongside the 5% trigger.",
+  "suggested_rule": "If NVDA falls 5% over a weekend, sell up to $500 of NVDA only while the market is closed.",
+  "verified": true,
+  "unconfirmed": [],
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 5681
+  }
+ },
+ "Sell $20 of Nvidia on any drop at night, even a small one.": {
+  "headline": "Neither replay triggered a sale.",
+  "advice": "Across 48 closed stretches, both versions recorded zero sales and the same $0.00 result versus holding per $1,000. The added checks made no historical difference in this replay; a clear drop threshold would make the rule more specific.",
+  "suggested_rule": "When the market is closed, sell $20 of NVDA if it falls 5% from the last close.",
+  "verified": true,
+  "unconfirmed": [],
+  "meta": {
+   "model": "gpt-6-luna",
+   "ms": 4601
+  }
+ }
+}

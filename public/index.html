@@ -190,6 +190,15 @@
   .news a span { color: var(--muted); font-size: 12px; white-space: nowrap; }
   .news a.cited { background: #fde7ec; box-shadow: inset 3px 0 0 var(--pink); }
   .guardrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .review { display: grid; grid-template-columns: 52px 1fr; gap: 18px; align-items: start; }
+  .review .av { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, var(--purple), var(--purple2)); display: grid; place-items: center; }
+  .review h3 { font-size: 20px; font-weight: 600; margin: 4px 0 6px; text-wrap: balance; }
+  .review .sug { margin-top: 14px; background: var(--soft); border-radius: 14px; padding: 14px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .review .sug q { flex: 1 1 320px; font-weight: 500; quotes: "\201C" "\201D"; }
+  .node .now { display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 9px; background: #fde7ec; color: var(--pink); }
+  .node .now.ok { background: #e3f8ef; color: #1c9e6f; }
+  .closeness { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 22px 0 0; font-size: 15px; }
+  .closeness .dots { display: flex; gap: 5px; } .closeness .dots i { width: 22px; height: 8px; border-radius: 4px; background: #fde7ec; } .closeness .dots i.ok { background: var(--green); }
   footer { padding: 46px 0 110px; color: var(--ink2); font-size: 13px; }
   footer ul { padding-left: 18px; display: grid; gap: 6px; max-width: 90ch; }
   @media (max-width: 1000px) { .hero { grid-template-columns: 1fr 1fr; } .pitch { grid-column: 1 / -1; order: -1; padding: 0; } .rgrid, .wgrid { grid-template-columns: 1fr; } .tabs, .search { display: none; } }
@@ -280,6 +289,7 @@
         <div class="legend" style="padding: 0 24px 20px"><span style="--c:#8f7bff"><i></i>Held: never reached your trigger (darker came closer)</span><span style="--c:#fb8b5a"><i></i>Held by Talos: a normal move for NVDA</span><span style="--c:#2fc48d"><i></i>Sold, it kept falling</span><span style="--c:#f25c78"><i></i>Sold, it came back</span><span style="--c:#f4cf2f"><i></i>Sold, ended flat</span></div>
       </div>
     </div>
+    <div class="card review" id="review" style="margin-top:24px"></div>
     <div class="card" style="margin-top:24px"><b style="font-weight:600">Every sale, and what happened next</b><table class="tape" id="tape"></table></div>
 
     <div class="row next"><a class="btn alt" href="#watch" style="text-decoration:none">Next: approve and watch ↓</a></div>
@@ -293,7 +303,8 @@
     <div class="stepbody" hidden>
     <div class="row" style="margin-top:0"><button class="btn" id="approve">Approve this flowchart</button><button class="btn alt hidden" id="walk">Check the market now</button><span class="note" id="walknote"></span></div>
     <div id="live" class="hidden">
-      <div class="card" style="padding:0; margin-top:24px"><div class="canvas" id="canvas2"></div></div>
+      <div id="closeness"></div>
+      <div class="card" style="padding:0; margin-top:18px"><div class="canvas" id="canvas2"></div></div>
       <div class="wgrid">
         <div class="card"><div class="label">Talos decided</div><div class="verdict" id="verdict"></div><p id="reason" style="color: var(--ink2); margin-top: 6px"></p><div id="agree"></div></div>
         <div class="card"><dl class="facts" id="factlist"></dl></div>
@@ -400,7 +411,7 @@ function condition(c) {
 }
 
 // The flowchart, drawn as pins joined by arcs. Any "no" drops to a hold.
-function drawFlow(el, plan, walk, animate) {
+function drawFlow(el, plan, walk, animate, facts) {
   const nodes = [{ id: "S", kind: "start", t: "Price update", v: "every check" }, ...plan.checks.map(c => ({ id: c.id, kind: c.type, t: KIND[c.type].t, v: condition(c) })), { id: "SELL", kind: "sell", t: "Then", v: `sell ${plan.action.sell_pct}% for USDG` }];
   const W = el.clientWidth || 1100, narrow = W < 900;
   const H = narrow ? 80 + nodes.length * 110 : 430;
@@ -425,7 +436,7 @@ function drawFlow(el, plan, walk, animate) {
     const st = status[n.id] || (n.id === "SELL" && walk && failAt < 0 ? "pass" : "");
     const dl = `animation-delay:${(i * .14).toFixed(2)}s`;
     html += `<div class="hex" style="${dl};left:${x}px;top:${y}px;--c:${KIND[n.kind].c}"></div>`;
-    html += `<div class="node ${st}${walk && !lit(i) ? " dim" : ""}" style="${dl};left:${x}px;top:${y - 14}px"><span class="ic" style="--c:${KIND[n.kind].c}">${icon(n.kind)}</span><span><span class="t">${esc(n.t)}</span><br><span class="v">${esc(n.v)}</span></span></div>`;
+    html += `<div class="node ${st}${walk && !lit(i) ? " dim" : ""}" style="${dl};left:${x}px;top:${y - 14}px"><span class="ic" style="--c:${KIND[n.kind].c}">${icon(n.kind)}</span><span><span class="t">${esc(n.t)}</span><br><span class="v">${esc(n.v)}</span>${facts && plan.checks[i - 1] && i <= plan.checks.length ? (([txt, ok]) => `<br><span class="now ${ok ? "ok" : ""}">${esc(txt)}</span>`)(nowOf(plan.checks[i - 1], facts)) : ""}</span></div>`;
   });
   plan.checks.forEach((c, i) => { const [x, y] = pts[i + 1]; html += `<span class="holdtag ${status[c.id] === "fail" ? "on" : ""}" style="left:${x}px;top:${y + 52}px">no → hold</span>`; });
   el.classList.toggle("anim", !!animate);
@@ -478,6 +489,7 @@ $("#build").onclick = async () => {
     $("#assume").innerHTML = extra.map(esc).join("<br>");
     $("#buildnote").textContent = d.meta.saved ? `Compiled by ${d.meta.model} through SERV and saved as an example. Write your own rule for a fresh compile.` : `Compiled by ${d.meta.model} through SERV in ${(d.meta.ms / 1000).toFixed(1)}s.`;
     replayView();
+    loadReview($("#ruletext").value, d.plan);
     $("#approve").classList.remove("hidden"); $("#walk").classList.add("hidden"); $("#live").classList.add("hidden"); $("#walknote").textContent = "";
     $("#flow").scrollIntoView({ behavior: "smooth" });
   } catch (e) { $("#buildnote").textContent = e.message; $("#buildnote").classList.add("err"); }
@@ -603,7 +615,8 @@ async function walkNow() {
     const d = await api("/api/live", { plan: state.plan });
     $("#live").classList.remove("hidden");
     state.walk = d.model ? { path: d.model.path.map((p, i) => ({ check: d.truth.path[i]?.check || p.check, passed: p.passed })) } : d.truth;
-    drawFlow($("#canvas2"), state.plan, state.walk, true);
+    drawFlow($("#canvas2"), state.plan, state.walk, true, d.snapshot.facts);
+    $("#closeness").innerHTML = closeness(state.plan, d.snapshot.facts);
     hero(d.snapshot);
     const dec = d.model?.decision || d.truth.decision;
     $("#verdict").textContent = dec === "sell" ? `Sell ${state.plan.action.sell_pct}%` : "Hold";
@@ -724,6 +737,42 @@ function newsCard(n, truth) {
     <div class="guardrow"><span class="agree yes" style="margin:0">✓ Headlines screened by SERV's Prompt Guard</span>${n.verdict === "bad_news" ? `<span class="agree ${n.verified ? "yes" : "no"}" style="margin:0">${n.verified ? "✓ Code confirmed every headline SERV cited" : "✕ Code couldn't confirm SERV's citation, so no sale"}</span>` : ""}</div>
     <p class="note" style="margin-top:10px">${(n.headlines || []).length} Nvidia headlines published since the close${n.serv ? `, judged by ${esc(n.serv.model)} through SERV in ${(n.serv.ms / 1000).toFixed(1)}s` : ""}. Headlines can't be replayed reliably, so the replay above is judged on the numbers alone.</p>`;
   el.classList.remove("hidden");
+}
+
+// SERV's review of the rule against its own replay, with every number checked by code.
+async function loadReview(rule, plan) {
+  const el = $("#review");
+  el.innerHTML = `<div class="av">${icon("real_news")}</div><div><div class="label">SERV's review of your rule</div><p class="note" style="margin-top:6px">SERV is reading your replay…</p></div>`;
+  try {
+    const r = await api("/api/review", { rule, plan });
+    el.innerHTML = `<div class="av">${icon("real_news")}</div><div>
+      <div class="label">SERV's review of your rule, from its replay</div>
+      <h3>${esc(r.headline)}</h3><p style="color: var(--ink2)">${esc(r.advice)}</p>
+      ${r.suggested_rule ? `<div class="sug"><q>${esc(r.suggested_rule)}</q><button class="btn alt" id="trysug">Try this rule</button></div>` : ""}
+      <p class="note" style="margin-top:10px">${r.verified ? "✓ Code checked every number SERV wrote against the replay." : "Code couldn't confirm every number in this review, so treat it with care."} History, not a forecast.</p></div>`;
+    const b = $("#trysug");
+    if (b) b.onclick = () => { $("#ruletext").value = r.suggested_rule; window.scrollTo({ top: $("#rule").getBoundingClientRect().top + scrollY - 20, behavior: "smooth" }); $("#build").click(); };
+  } catch (e) { el.innerHTML = `<div class="av">${icon("real_news")}</div><div><div class="label">SERV's review of your rule</div><p class="note" style="margin-top:6px">${esc(e.message)}</p></div>`; }
+}
+
+// What each check reads right now, and whether it passes, for the live flowchart.
+function nowOf(c, f) {
+  const d = f.drop_from_close_pct;
+  switch (c.type) {
+    case "market_closed": return [f.market_closed ? `now shut (${f.stretch})` : "now open", !!f.market_closed];
+    case "drop_from_close": return [d == null ? "no close yet" : d >= 0 ? `now down ${d.toFixed(2)}%` : `now up ${(-d).toFixed(2)}%`, d != null && d >= c.threshold];
+    case "move_vs_normal_day": return [f.move_vs_normal_day == null ? "no normal day yet" : `now ${f.move_vs_normal_day}×`, f.move_vs_normal_day != null && f.move_vs_normal_day >= c.threshold];
+    case "real_news": return [f.real_news == null ? "news not read" : f.real_news ? "real bad news" : "nothing real", f.real_news === true];
+    case "price_impact": return [`now ${f.price_impact_pct}%`, f.price_impact_pct <= c.threshold];
+    case "already_fired": return [f.already_fired ? "already sold" : "not sold yet", !f.already_fired];
+    case "size_cap": return [`sale $${f.sale_usd}`, f.sale_usd <= c.threshold];
+  }
+  return ["", true];
+}
+function closeness(plan, f) {
+  const res = plan.checks.map(c => nowOf(c, f)[1]), n = res.filter(Boolean).length;
+  const first = plan.checks[res.indexOf(false)];
+  return `<div class="closeness"><b style="font-weight:600">How close to selling:</b><span class="dots">${res.map(ok => `<i class="${ok ? "ok" : ""}"></i>`).join("")}</span><span>${n} of ${res.length} checks pass right now${first ? `. Waiting on: <b style="font-weight:600">${esc(first.label.toLowerCase())}</b> (${esc(nowOf(first, f)[0])})` : ". Every check passes."}</span></div>`;
 }
 </script>
 </body>
