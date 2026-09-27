@@ -1,6 +1,6 @@
 // The public watch: one check of the sensible rule against the live market,
 // appended to a log the website shows. It never sells: it has no wallet key.
-// bin/watch-loop.sh runs it every 15 minutes and publishes the log.
+// A scheduled GitHub Action (.github/workflows/watch.yml) runs it every 15 minutes.
 //
 //   node bin/watch.mjs [--log watch-log.json]
 //
