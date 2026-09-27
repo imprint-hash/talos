@@ -9,8 +9,8 @@
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { compileRule, walk } from "../src/serv.js";
-import { decide } from "../src/history.js";
-import { snapshot, CHAIN } from "../src/market.js";
+import { CHAIN } from "../src/market.js";
+import { checkNow, agree } from "../src/check.js";
 import { prepareSale, dryRun, send, CAPS } from "../src/guard.js";
 import { lastClose } from "../src/sessions.js";
 
@@ -25,11 +25,11 @@ else if (arg("--rule")) {
   console.log(`compiled by SERV → data/approved-plan.json\n  ${plan.summary}`);
 } else { console.log("Give --rule \"...\" or --plan file"); process.exit(1); }
 
-const snap = await snapshot({ positionUsd: Number(arg("--position") || 6), salePct: plan.action.sell_pct });
-const truth = decide(plan, snap.facts);
+const { snap, news, truth } = await checkNow(plan, { positionUsd: Number(arg("--position") || 6) });
 const model = await walk(plan, snap.facts);
-const agrees = model.decision === truth.decision && JSON.stringify(model.path.map(p => [p.check, p.passed])) === JSON.stringify(truth.path.map(p => [p.check, p.passed]));
+const agrees = agree(model, truth);
 console.log(`market ${snap.facts.market_closed ? "shut" : "open"} · NVDA $${snap.price} · ${-snap.facts.drop_from_close_pct}% since close`);
+if (news) console.log(`news: ${news.verdict}${news.verified ? "" : " (not confirmed by code)"} — ${news.reason}`);
 console.log(`SERV (${model.meta.model}): ${model.decision} — ${model.reason}`);
 console.log(`code: ${truth.decision} · ${agrees ? "agree" : "DISAGREE"}`);
 

@@ -1,5 +1,6 @@
-// Everything Talos asks a model goes through SERV Reasoning. Two jobs:
+// Everything Talos asks a model goes through SERV Reasoning. Three jobs:
 //   compile — read a person's rule and turn it into a decision graph
+//   news    — judge whether real bad news explains a drop (src/news.js)
 //   walk    — follow that graph for one moment in the market and decide
 // The numbers a decision rests on are computed in code and handed over; the
 // model reasons over them, and code checks what it concluded before anything
@@ -10,15 +11,17 @@ const ENDPOINT = "https://inference-api.openserv.ai/v1/chat/completions";
 export const COMPILE_MODEL = process.env.TALOS_COMPILE_MODEL || "gpt-6-luna";
 export const WALK_MODEL = process.env.TALOS_WALK_MODEL || "gpt-6-luna";
 
-export const CHECK_TYPES = ["market_closed", "drop_from_close", "move_vs_normal_day", "price_impact", "already_fired", "size_cap"];
+export const CHECK_TYPES = ["market_closed", "drop_from_close", "move_vs_normal_day", "real_news", "price_impact", "already_fired", "size_cap"];
 
-export async function serv({ model, system, user, schema, shadow, raw = false, timeoutMs = 45000 }) {
+export async function serv({ model, system, user, schema, shadow, guard = false, raw = false, timeoutMs = 45000 }) {
   const key = process.env.SERV_API_KEY;
   if (!key) throw new Error("SERV_API_KEY is not set");
   const body = { model, messages: [{ role: "system", content: system }, { role: "user", content: user }] };
   if (schema) body.response_format = { type: "json_schema", json_schema: { name: schema.name, strict: true, schema: schema.schema } };
   const tools = [];
   if (shadow && !raw) tools.push({ type: "function", function: { name: "serv_shadow_agent", parameters: { type: "object", properties: { hint: { type: "string", default: shadow }, max_iterations: { type: "integer", default: 2 } } } } });
+  // Prompt Guard screens text from outside (headlines) for injected instructions before any model sees it.
+  if (guard && !raw) tools.push({ type: "function", function: { name: "serv_prompt_guard" } });
   // Talos's instructions are published in its repo, so SERV's system-prompt leak filter only produces false alarms here.
   if (!raw) tools.push({ type: "function", function: { name: "serv_disable_content_filter", parameters: { type: "object", properties: {} } } });
   if (tools.length) body.tools = tools;
@@ -77,6 +80,7 @@ Check types (use each at most once, in this order when present):
 - market_closed: the US market is in a closed stretch (night or weekend). threshold null.
 - drop_from_close: price has fallen at least threshold % below the last US close.
 - move_vs_normal_day: the drop is at least threshold times this token's normal daily range. Stops a sale on an ordinary wobble.
+- real_news: real bad news (about Nvidia or the whole market) published since the close explains the drop. SERV reads the headlines; code checks the ones it cites. threshold null.
 - price_impact: selling now would move the price by at most threshold %.
 - already_fired: the rule has not already sold during this closed stretch. threshold null.
 - size_cap: the sale is at most threshold US dollars.
@@ -86,9 +90,10 @@ Rules:
 2. "Sell half" is sell_pct 50. "Sell everything/all" is 100. A dollar amount to sell is NOT a percentage: keep sell_pct as stated or 100 and add a size_cap check with that dollar amount.
 3. Always add market_closed, price_impact (threshold 1) and already_fired, marked added_by "talos", with a one-line why.
 4. Add move_vs_normal_day with threshold 1 marked added_by "talos" unless the person said to sell on any drop. Say why: most closed-market dips of this size come back by the open.
-5. If the person asks for something Talos cannot do (buy, another stock, a time-based sale, leverage), do not pretend: add it to "unclear".
-6. label is 2-6 plain words a non-trader understands. why is one short sentence.
-7. summary restates the final rule in one plain sentence.`;
+5. Add real_news marked added_by "talos" unless the person said to sell on any drop. Say why: a dip with no news behind it usually comes back, a drop with real bad news often doesn't.
+6. If the person asks for something Talos cannot do (buy, another stock, a time-based sale, leverage), do not pretend: add it to "unclear".
+7. label is 2-6 plain words a non-trader understands. why is one short sentence.
+8. summary restates the final rule in one plain sentence.`;
 
 export async function compileRule(text, opts = {}) {
   const r = await serv({
@@ -113,6 +118,7 @@ export function describe(c) {
     case "market_closed": return "US market closed?";
     case "drop_from_close": return `Down ${c.threshold}%+ from close?`;
     case "move_vs_normal_day": return `Drop ≥ ${c.threshold}× a normal day?`;
+    case "real_news": return "Real bad news behind it?";
     case "price_impact": return `Sale moves price ≤ ${c.threshold}%?`;
     case "already_fired": return "Not already sold this stretch?";
     case "size_cap": return `Sale ≤ $${c.threshold}?`;
@@ -154,6 +160,7 @@ const PASSES = {
   market_closed: () => "market_closed is true",
   drop_from_close: t => `drop_from_close_pct >= ${t}`,
   move_vs_normal_day: t => `move_vs_normal_day >= ${t} (fails if it is null)`,
+  real_news: () => "real_news is true (fails if false or null)",
   price_impact: t => `price_impact_pct <= ${t}`,
   already_fired: () => "already_fired is false",
   size_cap: t => `sale_usd <= ${t}`,
@@ -165,6 +172,7 @@ export function prose(plan) {
     market_closed: "only while the US market is closed",
     drop_from_close: `only if the price has fallen at least ${c.threshold}% below the last US close`,
     move_vs_normal_day: `only if that fall is at least ${c.threshold} times a normal day's range for NVDA (if there is no normal-day figure, do not sell)`,
+    real_news: "only if real bad news published since the close explains the fall (real_news is true)",
     price_impact: `only if selling would move the price by no more than ${c.threshold}%`,
     already_fired: "only if you have not already sold during this closed stretch",
     size_cap: `and never if the sale would be worth more than $${c.threshold}`,

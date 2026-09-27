@@ -56,6 +56,7 @@ export function factsAt(s, step, plan, period, firedAlready) {
     drop_from_close_pct: +drop.toFixed(2),
     normal_day_pct: s.normal ? +(s.normal * 100).toFixed(2) : null,
     move_vs_normal_day: s.normal ? +((drop / 100) / s.normal).toFixed(2) : null,
+    real_news: "not_replayed",
     price_impact_pct: 0.02,           // the main pool is deep; live runs quote it
     already_fired: firedAlready,
     position_usd: plan.position_usd ?? 1000,
@@ -73,6 +74,8 @@ export function decide(plan, f) {
       case "market_closed": pass = f.market_closed; break;
       case "drop_from_close": pass = f.drop_from_close_pct >= c.threshold; break;
       case "move_vs_normal_day": pass = f.move_vs_normal_day != null && f.move_vs_normal_day >= c.threshold; break;
+      // Headlines can't be replayed reliably, so history is judged on the numbers alone.
+      case "real_news": pass = f.real_news === true || f.real_news === "not_replayed"; break;
       case "price_impact": pass = f.price_impact_pct <= c.threshold; break;
       case "already_fired": pass = !f.already_fired; break;
       case "size_cap": pass = f.sale_usd <= c.threshold; break;

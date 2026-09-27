@@ -185,6 +185,11 @@
   .pill { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; background: var(--soft); color: var(--ink2); }
   .pill.hold { background: #efedff; color: var(--purple); } .pill.sell { background: #fde7ec; color: var(--pink); }
   @media (max-width: 1000px) { .awake { grid-template-columns: 1fr; } }
+  .news { display: grid; gap: 8px; margin-top: 14px; }
+  .news a { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--soft); color: var(--ink); text-decoration: none; font-size: 14px; }
+  .news a span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .news a.cited { background: #fde7ec; box-shadow: inset 3px 0 0 var(--pink); }
+  .guardrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   footer { padding: 46px 0 110px; color: var(--ink2); font-size: 13px; }
   footer ul { padding-left: 18px; display: grid; gap: 6px; max-width: 90ch; }
   @media (max-width: 1000px) { .hero { grid-template-columns: 1fr 1fr; } .pitch { grid-column: 1 / -1; order: -1; padding: 0; } .rgrid, .wgrid { grid-template-columns: 1fr; } .tabs, .search { display: none; } }
@@ -229,7 +234,7 @@
     <a href="#rule" class="howstep"><span class="hn">1</span><b>Write your rule</b><span>In plain English, like "sell half if Nvidia drops 3%".</span></a>
     <a href="#flow" class="howstep"><span class="hn">2</span><b>See the flowchart</b><span>SERV turns it into checks you can read, and adds safety checks.</span></a>
     <a href="#replay" class="howstep"><span class="hn">3</span><b>See what it would have done</b><span>Replayed on every real night and weekend since July.</span></a>
-    <a href="#watch" class="howstep"><span class="hn">4</span><b>Approve, and Talos keeps watch</b><span>It sells on Robinhood Chain only when your rule and the market agree.</span></a>
+    <a href="#watch" class="howstep"><span class="hn">4</span><b>Approve, and Talos keeps watch</b><span>SERV reads the news; it sells only when your rule, the market and the news agree.</span></a>
   </div>
 
   <section id="rule">
@@ -283,7 +288,7 @@
 
   <section id="watch" class="step">
     <div class="sh"><span class="n">4</span><h2>Approve, then Talos keeps watch</h2></div>
-    <p class="looking"><b>What you're looking at:</b> Talos checking the market right now. A small model walks your flowchart through SERV, Talos's code walks it too, and a sale needs both to agree.</p>
+    <p class="looking"><b>What you're looking at:</b> Talos checking the market right now. SERV reads the Nvidia news since the close and judges whether real bad news is behind the drop, which code can't do. Then a small model walks your flowchart through SERV, Talos's code walks it too, and a sale needs both to agree.</p>
     <div class="lock reveal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Unlocks when you build your rule in step 1.</span><a href="#rule">Go to step 1 ↑</a></div>
     <div class="stepbody" hidden>
     <div class="row" style="margin-top:0"><button class="btn" id="approve">Approve this flowchart</button><button class="btn alt hidden" id="walk">Check the market now</button><span class="note" id="walknote"></span></div>
@@ -293,6 +298,7 @@
         <div class="card"><div class="label">Talos decided</div><div class="verdict" id="verdict"></div><p id="reason" style="color: var(--ink2); margin-top: 6px"></p><div id="agree"></div></div>
         <div class="card"><dl class="facts" id="factlist"></dl></div>
       </div>
+      <div class="card hidden" id="newscard" style="margin-top:24px"></div>
     </div>
 
     </div>
@@ -304,7 +310,7 @@
     <div class="state" id="astate" style="margin:0 0 18px"><i></i><span>Reading the watch log…</span></div>
     <div class="awake reveal">
       <div class="tiles">
-        <div class="tile" style="background: var(--purple)"><b id="a1">—</b><span>checks while the market was shut, each one a SERV call</span></div>
+        <div class="tile" style="background: var(--purple)"><b id="a1">—</b><span>checks while the market was shut, each with SERV reading the news and walking the flowchart</span></div>
         <div class="tile" style="background: var(--cyan)"><b id="a2">—</b><span>times SERV and the code agreed</span></div>
         <div class="tile" style="background: var(--orange)"><b id="a3">—</b><span>sales. The rule: <span id="arule"></span></span></div>
       </div>
@@ -373,6 +379,7 @@ const KIND = {
   market_closed: { c: "var(--purple)", t: "US market", icon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>' },
   drop_from_close: { c: "var(--pink)", t: "Drop since close", icon: '<path d="M4 7l6 6 4-4 6 6M20 10v5h-5"/>' },
   move_vs_normal_day: { c: "var(--orange)", t: "Bigger than a normal day", icon: '<path d="M3 12h4l3-8 4 16 3-8h4"/>' },
+  real_news: { c: "var(--purple2)", t: "Real bad news", icon: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h6M7 13h10M7 16h7"/>' },
   price_impact: { c: "var(--cyan)", t: "Fair sell price", icon: '<path d="M4 20h16M7 16V9M12 16V5M17 16v-4"/>' },
   already_fired: { c: "var(--green)", t: "Once per stretch", icon: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>' },
   size_cap: { c: "var(--yellow)", t: "Sale size", icon: '<rect x="4" y="6" width="16" height="12" rx="2"/><path d="M4 10h16"/>' },
@@ -384,6 +391,7 @@ function condition(c) {
     case "market_closed": return "is shut";
     case "drop_from_close": return `down ${c.threshold}% or more`;
     case "move_vs_normal_day": return `at least ${c.threshold}× a normal day`;
+    case "real_news": return "behind the drop?";
     case "price_impact": return `moves price ≤ ${c.threshold}%`;
     case "already_fired": return "not sold yet";
     case "size_cap": return `$${c.threshold} or less`;
@@ -605,9 +613,11 @@ async function walkNow() {
     $("#factlist").innerHTML = [
       ["US market", f.market_closed ? `shut (${f.stretch})` : "open"], ["NVDA token", "$" + d.snapshot.price.toFixed(2)], ["Last US close", "$" + d.snapshot.last_close?.toFixed(2)],
       ["Since the close", sign(-f.drop_from_close_pct) + "%"], ["A normal day for NVDA", f.normal_day_pct + "%"], ["This move vs a normal day", f.move_vs_normal_day + "×"],
+      ["Real bad news since the close", f.real_news == null ? "not checked" : f.real_news ? "yes, confirmed" : "none found"],
       ["Price moved by the sale", f.price_impact_pct + "%"], ["New tokens can be minted", d.snapshot.mint_window_open ? "yes" : "no, weekend liquidity"], ["Robinhood Chain block", d.snapshot.block.toLocaleString()],
     ].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
     $("#agree").innerHTML = d.model ? `<span class="agree ${d.agrees ? "yes" : "no"}">${d.agrees ? "✓ SERV's walk matches Talos's code" : "✕ SERV and the code disagree, so Talos won't trade"}</span><p class="note" style="margin-top:10px">Walked by ${esc(d.model.meta.model)} through SERV in ${(d.model.meta.ms / 1000).toFixed(1)}s.</p>` : "";
+    newsCard(d.news, d.truth);
     $("#walknote").textContent = "Checked at " + new Date(d.snapshot.at * 1000).toLocaleTimeString() + ".";
   } catch (e) { $("#walknote").textContent = e.message; }
   $("#walk").disabled = false;
@@ -691,11 +701,30 @@ stepperState();
       <circle cx="${X(pts.length - 1)}" cy="${Y(-pts.at(-1).drop_pct)}" r="5" fill="#6c5cf5"/>`;
   }
   const t = s => new Date(s * 1000).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
-  $("#alog").innerHTML = `<tr><th>When</th><th>NVDA</th><th>From close</th><th>SERV said</th><th>Code said</th><th>Agree</th></tr>` +
+  $("#alog").innerHTML = `<tr><th>When</th><th>NVDA</th><th>From close</th><th>News, read by SERV</th><th>SERV said</th><th>Code said</th><th>Agree</th></tr>` +
     all.slice(0, 8).map(c => `<tr><td>${t(c.at)}</td><td>$${c.price.toFixed(2)}</td><td>${c.drop_pct == null ? "—" : `${c.drop_pct > 0 ? "−" : "+"}${Math.abs(c.drop_pct).toFixed(2)}%`}</td>
+      <td>${c.news ? `<span title="${esc(c.news.reason)}">${c.news.verdict === "bad_news" && c.news.verified ? "real bad news" : c.news.verdict === "blocked" ? "blocked" : c.news.verdict === "error" ? "unreadable" : "nothing real"} <span class="note">(${c.news.read})</span></span>` : "—"}</td>
       <td>${c.serv?.decision ? `<span class="pill ${c.serv.decision}">${c.serv.decision}</span>` : c.market === "open" ? `<span class="note">market open</span>` : `<span class="note">no answer</span>`}</td>
       <td><span class="pill ${c.code}">${c.code}</span></td><td>${c.agree == null ? "—" : c.agree ? `<span class="yes">yes</span>` : `<span class="no">no</span>`}</td></tr>`).join("");
 })();
+
+// What SERV made of the news: the one judgement in the flowchart that code can't make.
+function newsCard(n, truth) {
+  const el = $("#newscard");
+  if (!n) { el.classList.add("hidden"); return; }
+  const id = state.plan.checks.find(c => c.type === "real_news")?.id;
+  const reached = id && truth.path.some(p => p.check === id);
+  const bad = n.verdict === "bad_news" && n.verified;
+  const cited = new Set(n.cites || []);
+  const when = s => new Date(s * 1000).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  el.innerHTML = `<div class="row" style="margin:0; justify-content:space-between"><b style="font-weight:600">SERV read the news</b><span class="pill ${bad ? "sell" : "hold"}">${bad ? "real bad news" : n.verdict === "blocked" ? "blocked by Prompt Guard" : n.verdict === "error" ? "couldn't read the news" : "no real bad news"}</span></div>
+    <p style="margin-top:8px">${esc(n.reason)}</p>
+    ${!reached && id ? `<p class="note" style="margin-top:6px">Your flowchart stopped before this check, so it didn't decide anything this time. This is what SERV would say right now.</p>` : ""}
+    <div class="news">${(n.headlines || []).slice(0, 6).map(h => `<a href="${esc(h.link)}" target="_blank" rel="noopener" class="${cited.has(h.id) ? "cited" : ""}">${esc(h.title)}<span>${esc(h.source)} · ${when(h.at)}</span></a>`).join("") || `<span class="note">No Nvidia headlines since the close.</span>`}</div>
+    <div class="guardrow"><span class="agree yes" style="margin:0">✓ Headlines screened by SERV's Prompt Guard</span>${n.verdict === "bad_news" ? `<span class="agree ${n.verified ? "yes" : "no"}" style="margin:0">${n.verified ? "✓ Code confirmed every headline SERV cited" : "✕ Code couldn't confirm SERV's citation, so no sale"}</span>` : ""}</div>
+    <p class="note" style="margin-top:10px">${(n.headlines || []).length} Nvidia headlines published since the close${n.serv ? `, judged by ${esc(n.serv.model)} through SERV in ${(n.serv.ms / 1000).toFixed(1)}s` : ""}. Headlines can't be replayed reliably, so the replay above is judged on the numbers alone.</p>`;
+  el.classList.remove("hidden");
+}
 </script>
 </body>
 </html>
