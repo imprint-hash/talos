@@ -4,6 +4,8 @@
 
 Built for the [OpenServ SERV Hackathon](https://www.openserv.ai/hackathon), Edition 01 · Track: **Robinhood · Mainnet & MCP**
 
+**Live:** [talos-ecru.vercel.app](https://talos-ecru.vercel.app) · **First real sale on Robinhood Chain mainnet:** [0x3ca96c69…6150](https://robinhoodchain.blockscout.com/tx/0x3ca96c692d2b80422de0d32a5a3517e18ae3175159d58253492d1be7609e6150) · **Live watch log:** [watch-log.json](https://github.com/imprint-hash/talos/blob/watch/watch-log.json)
+
 ---
 
 ## The problem
