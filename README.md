@@ -97,7 +97,7 @@ Talos is unlocked by holding $SERV, OpenServ's token, not by a subscription. Con
 | About $50 | Watches 1 stock, checking every 15 minutes while the market is shut |
 | About $200 | Watches up to 5 stocks, checking every 5 minutes |
 
-The balance is re-checked every month, so access lasts only while the $SERV is held. That gives people a reason to buy and hold $SERV to use a product, never a promise about its price. Later, part of the value Talos creates can buy $SERV too: when Talos sells and the price keeps falling to the open, a share of what it saved you buys $SERV (that needs a bridge from Robinhood Chain to Base, so it comes after the holding tiers).
+The balance is re-checked every month, so access lasts only while the $SERV is held. That gives people a reason to buy and hold $SERV to use a product, never a promise about its price. Talos earns a small fee only when it saves you money: when it sells and the price keeps falling to the open, it keeps 10% of what it saved you, measured by code from the sale price and the pool's price at the open (sold $500 at 2 AM, worth $470 at the open: saved $30, fee $3). If the price comes back, or Talos holds, there's no fee. That fee pays for the SERV calls behind every check.
 
 **For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 checks a week** for one person watching NVDA, each one a news judgement and a walk through SERV. Because the rule is a flowchart, those run on the cheapest model:
 
