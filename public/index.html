@@ -178,6 +178,13 @@
   .canvas.anim path.arc { stroke-dasharray: 900; stroke-dashoffset: 900; animation: draw .9s ease forwards; }
   @media (max-width: 1000px) { .how { grid-template-columns: 1fr 1fr; } .stepper a { padding: 8px 10px; } .stepper a span { display: none; } }
   @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .canvas.anim * { animation: none !important; stroke-dashoffset: 0 !important; } }
+  .awake { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+  .awake .tiles .tile b { font-size: 24px; }
+  .spark { width: 100%; height: 150px; display: block; margin-top: 8px; }
+  .yes { color: var(--green); font-weight: 600; } .no { color: var(--pink); font-weight: 600; }
+  .pill { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; background: var(--soft); color: var(--ink2); }
+  .pill.hold { background: #efedff; color: var(--purple); } .pill.sell { background: #fde7ec; color: var(--pink); }
+  @media (max-width: 1000px) { .awake { grid-template-columns: 1fr; } }
   footer { padding: 46px 0 110px; color: var(--ink2); font-size: 13px; }
   footer ul { padding-left: 18px; display: grid; gap: 6px; max-width: 90ch; }
   @media (max-width: 1000px) { .hero { grid-template-columns: 1fr 1fr; } .pitch { grid-column: 1 / -1; order: -1; padding: 0; } .rgrid, .wgrid { grid-template-columns: 1fr; } .tabs, .search { display: none; } }
@@ -189,11 +196,11 @@
 <nav class="top"><div class="wrap">
   <div class="logo"><span class="m"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>Talos</div>
   <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9597bd" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Robinhood Chain · NVDA / USDG</span></div>
-  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a><a href="#usage">Usage</a></div>
+  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#awake">Awake</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a><a href="#usage">Usage</a></div>
 </div></nav>
 
 <div class="stepper" id="stepper">
-  <a href="#rule" data-s="rule"><i>1</i>Rule</a><a href="#flow" data-s="flow"><i>2</i>Flowchart</a><a href="#replay" data-s="replay"><i>3</i>Replay</a><a href="#watch" data-s="watch"><i>4</i>Watch</a><a href="#receipts" data-s="receipts"><i>✓</i>Proof</a>
+  <a href="#rule" data-s="rule"><i>1</i>Rule</a><a href="#flow" data-s="flow"><i>2</i>Flowchart</a><a href="#replay" data-s="replay"><i>3</i>Replay</a><a href="#watch" data-s="watch"><i>4</i>Watch</a><a href="#awake" data-s="awake"><i>✓</i>Proof</a>
 </div>
 <main class="wrap">
   <div class="hero">
@@ -292,6 +299,24 @@
   </section>
 
   <div class="proofhead reveal"><span>The proof</span><p>What Talos has actually done, how well it holds up, and why every watch runs on SERV.</p></div>
+  <section id="awake">
+    <div class="sh"><span class="n p">✓</span><h2>Awake right now</h2><p>Not a demo: Talos checks the live market every 15 minutes, on the quarter hour, whenever the US market is shut. Every check is a real SERV call, logged below.</p></div>
+    <div class="state" id="astate" style="margin:0 0 18px"><i></i><span>Reading the watch log…</span></div>
+    <div class="awake reveal">
+      <div class="tiles">
+        <div class="tile" style="background: var(--purple)"><b id="a1">—</b><span>checks while the market was shut, each one a SERV call</span></div>
+        <div class="tile" style="background: var(--cyan)"><b id="a2">—</b><span>times SERV and the code agreed</span></div>
+        <div class="tile" style="background: var(--orange)"><b id="a3">—</b><span>sales. The rule: <span id="arule"></span></span></div>
+      </div>
+      <div class="card">
+        <b style="font-weight:600">NVDA since the last close, against the rule's trigger</b>
+        <svg class="spark" id="aspark" viewBox="0 0 600 150" preserveAspectRatio="none"></svg>
+        <table class="tape" id="alog"></table>
+        <p class="note" style="margin-top:10px">The watch runs from the owner's machine and has no wallet key, so it can't sell; it shows the decisions. Sales go through the separate, capped guard. <a href="https://github.com/imprint-hash/talos/blob/main/bin/watch.mjs">How it runs</a> · <a href="https://github.com/imprint-hash/talos/blob/watch/watch-log.json">raw log</a></p>
+      </div>
+    </div>
+  </section>
+
   <section id="receipts">
     <div class="sh"><span class="n p">✓</span><h2>Receipts</h2><p>Real sales on Robinhood Chain mainnet. This page can't sell; the guard runs separately with a cap.</p></div>
     <div class="card reveal" id="rlist"><span class="note">No sale yet.</span></div>
@@ -620,11 +645,11 @@ function stepperState() {
     a.classList.toggle("locked", !built && ["flow", "replay", "watch"].includes(k));
   });
 }
-const sections = ["rule", "flow", "replay", "watch", "receipts", "score", "usage"];
+const sections = ["rule", "flow", "replay", "watch", "awake", "receipts", "score", "usage"];
 const stepObs = new IntersectionObserver(es => {
   es.forEach(e => {
     if (!e.isIntersecting) return;
-    const id = e.target.id; current = ["score", "usage"].includes(id) ? "receipts" : id; stepperState();
+    const id = e.target.id; current = ["receipts", "score", "usage"].includes(id) ? "awake" : id; stepperState();
     if (id === "replay" && state.plan) { state.replaySeen = true; if (state.bmPending) { state.bmPending = false; bmKey = null; bubbleMap(); } }
   });
 }, { rootMargin: "-45% 0px -45% 0px" });
@@ -635,6 +660,42 @@ new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && state.p
 addEventListener("scroll", () => $("#stepper").classList.toggle("on", scrollY > 520), { passive: true });
 stepperState();
 
+
+// The public watch log, written every 15 minutes by the scheduled job.
+(async () => {
+  let log;
+  try { log = await (await fetch("https://raw.githubusercontent.com/imprint-hash/talos/watch/watch-log.json", { cache: "no-store" })).json(); }
+  catch { $("#astate span").textContent = "The watch log isn't reachable right now."; return; }
+  const all = log.checks || [], shut = all.filter(c => c.market !== "open"), walked = shut.filter(c => c.serv && c.serv.decision);
+  const ago = s => { const m = Math.round((Date.now() / 1000 - s) / 60); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.floor(m / 60)} h ${m % 60} min ago`; };
+  const last = all[0];
+  if (last) {
+    $("#astate").classList.toggle("open", last.market === "open");
+    $("#astate span").textContent = `Last check ${ago(last.at)} · ${last.market === "open" ? "market open, your broker is awake" : `market shut (${last.market}), Talos is watching`} · NVDA $${last.price.toFixed(2)}`;
+  }
+  $("#a1").textContent = shut.length.toLocaleString();
+  $("#a2").textContent = walked.length ? `${walked.filter(c => c.agree).length} of ${walked.length}` : "—";
+  $("#a3").textContent = all.filter(c => c.code === "sell" && c.agree).length;
+  $("#arule").textContent = `"${log.rule}"`;
+  // Distance from the close over time, with the -3% trigger drawn in.
+  const pts = all.slice(0, 200).reverse().filter(c => c.drop_pct != null);
+  if (pts.length > 1) {
+    const ys = pts.map(c => -c.drop_pct), lo = Math.min(-3.4, ...ys), hi = Math.max(0.6, ...ys);
+    const X = i => i / (pts.length - 1) * 600, Y = v => 10 + (hi - v) / (hi - lo) * 130;
+    const line = pts.map((c, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(-c.drop_pct).toFixed(1)}`).join("");
+    $("#aspark").innerHTML = `<line x1="0" x2="600" y1="${Y(0)}" y2="${Y(0)}" stroke="#eceefa" stroke-width="2"/>
+      <line x1="0" x2="600" y1="${Y(-3)}" y2="${Y(-3)}" stroke="#f25c78" stroke-width="2" stroke-dasharray="6 5"/>
+      <text x="596" y="${Y(-3) - 6}" text-anchor="end" font-size="12" fill="#f25c78">sell trigger, −3%</text>
+      <text x="596" y="${Y(0) - 6}" text-anchor="end" font-size="12" fill="#9597bd">last close</text>
+      <path d="${line}L600,${Y(lo)}L0,${Y(lo)}Z" fill="rgba(108,92,245,.08)"/><path d="${line}" fill="none" stroke="#6c5cf5" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+      <circle cx="${X(pts.length - 1)}" cy="${Y(-pts.at(-1).drop_pct)}" r="5" fill="#6c5cf5"/>`;
+  }
+  const t = s => new Date(s * 1000).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  $("#alog").innerHTML = `<tr><th>When</th><th>NVDA</th><th>From close</th><th>SERV said</th><th>Code said</th><th>Agree</th></tr>` +
+    all.slice(0, 8).map(c => `<tr><td>${t(c.at)}</td><td>$${c.price.toFixed(2)}</td><td>${c.drop_pct == null ? "—" : `${c.drop_pct > 0 ? "−" : "+"}${Math.abs(c.drop_pct).toFixed(2)}%`}</td>
+      <td>${c.serv?.decision ? `<span class="pill ${c.serv.decision}">${c.serv.decision}</span>` : c.market === "open" ? `<span class="note">market open</span>` : `<span class="note">no answer</span>`}</td>
+      <td><span class="pill ${c.code}">${c.code}</span></td><td>${c.agree == null ? "—" : c.agree ? `<span class="yes">yes</span>` : `<span class="no">no</span>`}</td></tr>`).join("");
+})();
 </script>
 </body>
 </html>
