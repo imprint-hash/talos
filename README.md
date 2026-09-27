@@ -97,7 +97,7 @@ Every sale is also in [`data/receipts.json`](data/receipts.json).
 | When Talos sells and the price comes back, or it holds | **Nothing extra** |
 | AI agents (coming next) | Talos as an MCP tool, **paid per check with x402** |
 
-Each person costs Talos about $1 a month in SERV calls (the news check and the walk, every 15 minutes while the market is shut), so the $2 plan covers its own reasoning, and the success fee is only earned on nights Talos was right.
+The walk costs about $0.49 a person a month through SERV (measured, below), and the news check roughly doubles that, to about $1: the $2 plan covers its own reasoning, and the success fee is only earned on nights Talos was right.
 
 **For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 checks a week** for one person watching NVDA, each one a news judgement and a walk through SERV. Because the rule is a flowchart, those run on the cheapest model:
 
