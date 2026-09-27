@@ -88,9 +88,18 @@ Every sale is also in [`data/receipts.json`](data/receipts.json).
 
 ## Revenue, for Talos and for SERV
 
-**For Talos:** people already pay for stop-losses, and stock tokens trading while the market is shut have none. Talos sells the missing stop: a flat monthly fee per ticker watched, an execution fee only on sales it actually makes, and the option to pay in $SERV.
+**Pricing: Talos only earns extra when it saves you money.**
 
-**For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 SERV calls a week** for one person watching NVDA. Because the rule is a flowchart, those run on the cheapest model:
+| | What you pay |
+|---|---|
+| Watching one stock | **$2 a month**, paid from your wallet in USDG on Robinhood Chain |
+| When Talos sells and the price keeps falling to the open | **10% of the money it saved you**, measured by code from the sale price and the pool's price at the open. Sold $500 at 2 AM, worth $470 at the open: Talos saved you $30 and keeps $3 |
+| When Talos sells and the price comes back, or it holds | **Nothing extra** |
+| AI agents (coming next) | Talos as an MCP tool, **paid per check with x402** |
+
+Each person costs Talos about $1 a month in SERV calls (the news check and the walk, every 15 minutes while the market is shut), so the $2 plan covers its own reasoning, and the success fee is only earned on nights Talos was right.
+
+**For OpenServ, every watch is SERV Reasoning usage.** Talos checks every 15 minutes whenever the US market is shut: **542 checks a week** for one person watching NVDA, each one a news judgement and a walk through SERV. Because the rule is a flowchart, those run on the cheapest model:
 
 | | Per person per month | 10,000 people per month |
 |---|---|---|

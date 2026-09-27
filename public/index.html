@@ -210,7 +210,7 @@
 <nav class="top"><div class="wrap">
   <div class="logo"><span class="m"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 4h10M8 4v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>Talos</div>
   <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9597bd" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Robinhood Chain · NVDA / USDG</span></div>
-  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#awake">Awake</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a><a href="#usage">Usage</a></div>
+  <div class="tabs"><a href="#rule">Rule</a><a href="#flow">Flowchart</a><a href="#replay">Replay</a><a href="#watch">Watch</a><a href="#awake">Awake</a><a href="#receipts">Receipts</a><a href="#score">Scoreboard</a><a href="#pricing">Pricing</a><a href="#usage">Usage</a></div>
 </div></nav>
 
 <div class="stepper" id="stepper">
@@ -343,6 +343,19 @@
     <div class="sh"><span class="n p">✓</span><h2>Does it hold up?</h2><p>The same flowchart walked over 40 real and awkward moments, scored against Talos's code.</p></div>
     <div class="card reveal" id="sboard"><span class="note">Loading…</span></div>
   </section>
+  <section id="pricing">
+    <div class="sh"><span class="n p">✓</span><h2>Pricing</h2><p>Talos only earns extra when it saves you money.</p></div>
+    <div class="card reveal">
+      <dl class="facts">
+        <dt>Watching one stock</dt><dd>$2 a month, paid from your wallet in USDG</dd>
+        <dt>Talos sold, and the price kept falling to the open</dt><dd>10% of what it saved you</dd>
+        <dt>Talos sold and the price came back, or it held</dt><dd>nothing extra</dd>
+        <dt>AI agents (coming next)</dt><dd>Talos as an MCP tool, pay per check with x402</dd>
+      </dl>
+      <p class="note" style="margin-top:12px">Example: Talos sells $500 of NVDA at 2 AM, and it's worth $470 at the open. Talos saved you $30 and keeps $3. Code measures it from the sale and the pool's price at the open. Each person costs about $1 a month in SERV calls, so the plan covers its own reasoning.</p>
+    </div>
+  </section>
+
   <section id="usage">
     <div class="sh"><span class="n p">✓</span><h2>Every watch runs on SERV</h2><p>Talos checks every 15 minutes whenever the US market is shut. Each check is one SERV Reasoning call on the cheapest model, which only works because the rule is a flowchart.</p></div>
     <div class="rgrid">
@@ -668,11 +681,11 @@ function stepperState() {
     a.classList.toggle("locked", !built && ["flow", "replay", "watch"].includes(k));
   });
 }
-const sections = ["rule", "flow", "replay", "watch", "awake", "receipts", "score", "usage"];
+const sections = ["rule", "flow", "replay", "watch", "awake", "receipts", "score", "pricing", "usage"];
 const stepObs = new IntersectionObserver(es => {
   es.forEach(e => {
     if (!e.isIntersecting) return;
-    const id = e.target.id; current = ["receipts", "score", "usage"].includes(id) ? "awake" : id; stepperState();
+    const id = e.target.id; current = ["receipts", "score", "pricing", "usage"].includes(id) ? "awake" : id; stepperState();
     if (id === "replay" && state.plan) { state.replaySeen = true; if (state.bmPending) { state.bmPending = false; bmKey = null; bubbleMap(); } }
   });
 }, { rootMargin: "-45% 0px -45% 0px" });
