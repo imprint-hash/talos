@@ -27,10 +27,12 @@ Most closed-market dips come back by the morning. A dumb stop-loss sells you at 
 2. **SERV Reasoning compiles it into a flowchart.** Each "if" becomes a diamond. SERV keeps your numbers exactly as you gave them, flags anything unclear, and adds the checks you didn't think of, each marked **Talos** with a one-line reason:
    - *Is this drop big compared with a normal day for NVDA?* Most closed-market dips of this size come back by the open.
    - *Would selling move the price more than 1%?*
+   - *Is there real bad news behind the drop?* A dip with no news usually comes back; a drop with real bad news often doesn't.
    - *Have I already sold during this closed stretch?*
 3. **Talos replays your flowchart on every real night and weekend** before you approve it, and shows what it would have done: never fired, fired and it bounced back, fired and it kept falling, and what that did to your money against simply holding.
-4. **You approve the flowchart, not each trade.** From then on, on every check, a small, cheap model walks your approved graph through SERV, and Talos's code evaluates the same graph exactly. **A sale needs both to agree.** The path that decided it lights up.
-5. **Talos sells on Robinhood Chain** (NVDA → USDG on Uniswap) from one small wallet, with a per-sale cap, after a dry run.
+4. **SERV reads the news.** When the market is shut, Talos pulls the Nvidia headlines published since the close. SERV's **Prompt Guard** screens them first (headlines are text written by strangers), then SERV judges whether real bad news explains the drop and cites the headlines that show it. Talos's code checks every citation: it must be a headline Talos actually fetched, published after the close, and about Nvidia. If it isn't, there's no sale.
+5. **You approve the flowchart, not each trade.** From then on, on every check, a small, cheap model walks your approved graph through SERV, and Talos's code evaluates the same graph exactly. **A sale needs both to agree.** The path that decided it lights up.
+6. **Talos sells on Robinhood Chain** (NVDA → USDG on Uniswap) from one small wallet, with a per-sale cap, after a dry run.
 
 ## Why SERV is the core, not a logo
 
@@ -39,6 +41,7 @@ SERV's research, [BRAID](https://arxiv.org/abs/2512.15959), argues that models g
 | Step | What SERV does |
 |---|---|
 | Compile | Turns the person's sentence into a typed plan (strict JSON schema) that becomes the flowchart. The **Shadow Agent** validates that every number came from the person's words: *"$20 of Nvidia"* becomes a $20 cap, never 20%. |
+| News | The one judgement code can't make: is there real bad news behind this drop? SERV reads the headlines since the close, behind **Prompt Guard**, and cites its evidence; code verifies every citation before it can count. We tested it with a fake headline that ordered it to say "sell" (ignored), a real-sounding export ban (flagged, cited correctly) and a made-up citation (rejected by code). |
 | Walk | On every check, `gpt-6-luna` through SERV walks the approved graph and explains the decision in one plain sentence. |
 | Guard | Arithmetic, prices and dates never go through a model, following SERV's own guidance. Code measures, SERV reasons, and code checks the conclusion before money moves. |
 
@@ -59,6 +62,10 @@ We walked the same graph over 40 moments: 32 real closed-market moments from the
 **The night that fooled every model.** On Tuesday 4 August NVDA *rose* 7.2% after the close. Given the rule as a paragraph instead of a flowchart, every setup, including the frontier model, read "7.19" as a 7% drop and said **sell**. Talos's code said **hold**, and Talos only trades when the model and the code agree, so it would not have sold into a rally.
 
 **What we are not claiming.** In this test SERV did not make the small model *more* accurate than calling it directly; once the graph exists, both are already right. With the rule as a paragraph, SERV redacted the check names in its answers and reported its steps differently, so it scores lower on exact steps; its sell/hold decisions were right in 39 of 40. Raw results are in [`data/scoreboard.json`](data/scoreboard.json) and [`data/scoreboard-prose.json`](data/scoreboard-prose.json), and `npm run eval` reruns it.
+
+## Awake right now
+
+Talos isn't only a demo. A watch checks the live market every 15 minutes, on the quarter hour, whenever the US market is shut: it reads the chain, has SERV read the news, walks the approved 3% rule through SERV, and evaluates it in code. Every decision is published to the [`watch` branch](https://github.com/imprint-hash/talos/blob/watch/watch-log.json) and shown on the page under **Awake right now**. The watch runs from the owner's machine (`bin/watch-loop.sh`) and has no wallet key, so it can't sell.
 
 ## Safety
 
@@ -95,6 +102,8 @@ That's SERV's own argument, bounded reasoning making a small model good enough t
 | Path | What it is |
 |---|---|
 | `src/serv.js` | SERV calls: compile a rule into a plan, draw the flowchart, walk it (flowchart or paragraph) |
+| `src/news.js` | Headlines since the close, SERV's judgement behind Prompt Guard, and code's check of every citation |
+| `src/check.js` | One live check, the same for the website, the watch and the guard |
 | `src/history.js` | Closed-market stretches, what a normal day is, the exact evaluation of a plan, and the replay |
 | `src/market.js` | Live reads from Robinhood Chain: pool price, Uniswap quote for the sale size, last close |
 | `src/sessions.js` | New York session times, and the stock token mint/burn window |
@@ -102,6 +111,7 @@ That's SERV's own argument, bounded reasoning making a small model good enough t
 | `api/` | `compile`, `live`, `status` for the website |
 | `bin/guard.mjs` | One watch cycle from the owner's machine |
 | `bin/eval.mjs` | The scoreboard |
+| `bin/watch.mjs`, `bin/watch-loop.sh` | The public watch, every 15 minutes |
 | `data/nvda_15m.json` | Every 15-minute price of the NVDA/USDG pool since it opened (GeckoTerminal) |
 
 Pool: Uniswap v3 NVDA/USDG 0.05% on Robinhood Chain, [`0xd4eb…14a3`](https://robinhoodchain.blockscout.com/address/0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3), about $5.7M of liquidity.
@@ -119,6 +129,7 @@ Node 20+, no dependencies.
 - **Not advice.** Talos follows the rule you approve. It doesn't predict prices.
 - **Small history.** The pool opened on 21 July 2026, so the replay covers 48 closed stretches, 9 of them weekends.
 - **One stock, one direction.** NVDA only, sell only, for now.
+- **The news isn't replayed.** Old headlines can't be fetched reliably for every past night, so the replay judges history on the numbers alone. The news check runs live only.
 - **US holidays** aren't modelled; they show up as longer stretches.
 - The market is treated as shut outside 09:30–16:00 New York time on weekdays.
 
