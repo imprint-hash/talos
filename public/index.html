@@ -354,6 +354,8 @@
         <dt>Talos sold, and the price kept falling to the open</dt><dd>a 10% fee on what it saved you</dd>
         <dt>Talos sold and the price came back, or it held</dt><dd>no fee</dd>
       </dl>
+      <div class="row" style="margin-top:16px"><button class="btn" id="connect">Connect wallet: check my $SERV</button><input id="addr" placeholder="or paste a wallet address (0x…)" style="flex:1 1 260px; min-width:0; font: inherit; font-size:14px; padding:11px 14px; border-radius:12px; border:1px solid var(--line); background:var(--soft); color:var(--ink)"><button class="btn alt" id="checkaddr">Check</button></div>
+      <p id="servres" style="margin-top:12px"></p>
       <p class="note" style="margin-top:12px">Connect a wallet and Talos reads its $SERV balance on Base. It's read only: no transaction and no bridge, and the same address works on both chains. Access lasts while the $SERV is held. That's a reason to use $SERV, not a promise about its price. Example fee: Talos sells $500 of NVDA at 2 AM and it's worth $470 at the open, so it saved you $30 and keeps $3.</p>
     </div>
   </section>
@@ -789,6 +791,33 @@ function closeness(plan, f) {
   const first = plan.checks[res.indexOf(false)];
   return `<div class="closeness"><b style="font-weight:600">How close to selling:</b><span class="dots">${res.map(ok => `<i class="${ok ? "ok" : ""}"></i>`).join("")}</span><span>${n} of ${res.length} checks pass right now${first ? `. Waiting on: <b style="font-weight:600">${esc(first.label.toLowerCase())}</b> (${esc(nowOf(first, f)[0])})` : ". Every check passes."}</span></div>`;
 }
+
+// Hold $SERV to run Talos: read a wallet's $SERV on Base (read only, no transaction) and show its level.
+const SERV_TOKEN = "0x5576d6ed9181f2225aff5282ac0ed29f755437ea";
+async function servLevel(address) {
+  const out = $("#servres");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) { out.textContent = "That doesn't look like a wallet address."; return; }
+  out.textContent = "Reading your $SERV balance on Base…";
+  try {
+    const call = await (await fetch("https://base-rpc.publicnode.com", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: SERV_TOKEN, data: "0x70a08231" + address.slice(2).toLowerCase().padStart(64, "0") }, "latest"] }) })).json();
+    const held = Number(BigInt(call.result)) / 1e18;
+    const pj = await (await fetch(`https://api.geckoterminal.com/api/v2/simple/networks/base/token_price/${SERV_TOKEN}`)).json();
+    const price = Number(pj.data.attributes.token_prices[SERV_TOKEN]);
+    const usd = held * price;
+    const level = usd >= 200 ? "Up to 5 stocks, checks every 5 minutes" : usd >= 50 ? "1 stock, checks every 15 minutes" : null;
+    const need = usd >= 200 ? 0 : usd >= 50 ? 200 - usd : 50 - usd;
+    out.innerHTML = `<b style="font-weight:600">${held.toLocaleString(undefined, { maximumFractionDigits: 0 })} $SERV</b> ≈ $${usd.toFixed(2)} (at $${price.toFixed(4)}). ` +
+      (level ? `<span class="agree yes" style="margin:0">✓ Unlocks: ${level}</span>` : `<span class="agree no" style="margin:0">Not enough yet</span>`) +
+      (need > 0 ? ` <span class="note">About $${need.toFixed(2)} more of $SERV for the ${usd >= 50 ? "5-stock" : "first"} level.</span>` : "");
+  } catch (e) { out.textContent = "Couldn't read Base right now. Try again in a moment."; }
+}
+$("#connect").onclick = async () => {
+  if (!window.ethereum) { $("#servres").textContent = "No wallet found in this browser. Paste your address instead."; return; }
+  try { const [a] = await window.ethereum.request({ method: "eth_requestAccounts" }); $("#addr").value = a; servLevel(a); }
+  catch { $("#servres").textContent = "The wallet didn't connect. You can paste your address instead."; }
+};
+$("#checkaddr").onclick = () => servLevel($("#addr").value.trim());
 </script>
 </body>
 </html>
